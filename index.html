@@ -1,1310 +1,3664 @@
-<!DOCTYPE html>
-<html lang="ja">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rise of Kingdoms - KvK貢献度レポート</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .header .subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .stats-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card .number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .label {
-            font-size: 1rem;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .chart-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .chart-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            color: #333;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 500px;
-            margin-bottom: 20px;
-        }
-
-        .rankings-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .ranking-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease;
-        }
-
-        .ranking-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .ranking-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 10px;
-            color: white;
-        }
-
-        .ranking-card.t5-kills h3 {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-        }
-
-        .ranking-card.dead h3 {
-            background: linear-gradient(135deg, #FF5722, #e64a19);
-        }
-
-        .ranking-card.farm-dead h3 {
-            background: linear-gradient(135deg, #9C27B0, #7b1fa2);
-        }
-
-        .ranking-list {
-            list-style: none;
-        }
-
-        .ranking-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-            transition: all 0.3s ease;
-        }
-
-        .ranking-item:hover {
-            background: rgba(255, 255, 255, 1);
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .ranking-item.rank-1 {
-            border-left-color: #FFD700;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
-        }
-
-        .ranking-item.rank-2 {
-            border-left-color: #C0C0C0;
-            background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), rgba(192, 192, 192, 0.05));
-        }
-
-        .ranking-item.rank-3 {
-            border-left-color: #CD7F32;
-            background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(205, 127, 50, 0.05));
-        }
-
-        .rank-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .rank-number {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #667eea;
-            min-width: 30px;
-        }
-
-        .player-name {
-            font-weight: 600;
-            color: #333;
-            font-size: 1.1rem;
-        }
-
-        .score {
-            font-weight: bold;
-            color: #e74c3c;
-            font-family: 'Courier New', monospace;
-        }
-
-        .formula-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            text-align: center;
-        }
-
-        .formula-section h3 {
-            font-size: 1.6rem;
-            margin-bottom: 20px;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .formula {
-            font-size: 1.2rem;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
-            color: #333;
-        }
-
-        .period-info {
-            font-size: 1.1rem;
-            color: #666;
-            margin-top: 15px;
-        }
-
-        /* 全メンバーリスト用のスタイル */
-        .all-members-section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            margin-bottom: 30px;
-        }
-
-        .all-members-section h2 {
-            font-size: 2rem;
-            margin-bottom: 25px;
-            color: #333;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .display-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .display-btn {
-            padding: 10px 20px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .display-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .display-btn.active {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .search-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .search-input {
-            padding: 10px 15px;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            font-size: 14px;
-            width: 250px;
-            transition: border-color 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .stats-info {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .members-table-container {
-            overflow-x: auto;
-            margin: 20px 0;
-            max-height: 70vh;
-            overflow-y: auto;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .members-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .members-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .members-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-        }
-
-        .members-table tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.01);
-            transition: all 0.2s ease;
-        }
-
-        .members-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .rank-cell {
-            font-weight: bold;
-            color: #667eea;
-            text-align: center;
-            width: 80px;
-        }
-
-        .name-cell {
-            font-weight: 600;
-            color: #333;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .number-cell {
-            text-align: right;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-        }
-
-        .dkp-cell {
-            font-weight: bold;
-            color: #e74c3c;
-            text-align: right;
-            font-family: 'Courier New', monospace;
-        }
-
-        .top3 {
-            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%) !important;
-            font-weight: bold;
-        }
-
-        .top10 {
-            background: linear-gradient(135deg, #a8e6cf 0%, #88d8a3 100%) !important;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-        .badge-gold {
-            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-            color: white;
-        }
-
-        .badge-silver {
-            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
-            color: white;
-        }
-
-        .badge-bronze {
-            background: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
-            color: white;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .pagination-btn {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #667eea;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .pagination-btn:hover:not(.disabled) {
-            background: #667eea;
-            color: white;
-        }
-
-        .pagination-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pagination-info {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .footer {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 30px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .footer p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
+  <meta charset="utf-8">
+  <title>KvK Contribution Ranking 2025/11 - Heroic Anthem</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Noto Sans JP',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;background:#f7fbff;margin:0;padding:24px}
+    .container{max-width:1280px;margin:0 auto}
+    h1{margin:0 0 18px;text-align:center}
+    .subtitle{text-align:center;color:#5b6b82;margin:-6px 0 18px}
+    .card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.06);margin-bottom:20px}
+    .card.inner{box-shadow:none;border:1px solid #eef2ff}
+    .card-title{font-weight:800;margin:0 0 10px;text-align:center}
+
+    /* DKP bars */
+    .bar-header{display:grid;grid-template-columns:1fr 280px;gap:12px;align-items:end;margin-bottom:8px}
+    @media (max-width: 980px){ .bar-header{grid-template-columns:1fr} }
+    .bar-row{display:grid;grid-template-columns:320px 1fr 160px;gap:12px;align-items:center;padding:8px 6px;border-radius:10px}
+    @media (max-width: 980px){ .bar-row{grid-template-columns:220px 1fr 120px} }
+    .bar-row:nth-child(odd){background:#f4f7ff}
+    .bar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+    .bar-track{width:100%;height:16px;border-radius:10px;background:#eaf0ff;overflow:hidden}
+    .bar-fill{height:16px;border-radius:10px;background:linear-gradient(90deg,rgba(116,154,255,.95),rgba(116,154,255,.55))}
+    .bar-value{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;padding:0 4px}
+
+    /* TOP5 grid */
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    @media (max-width: 980px){ .grid3{grid-template-columns:1fr} }
+    .rows{display:flex;flex-direction:column;gap:8px}
+    .row{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;background:#f6f9ff}
+    .rank{text-align:center;font-size:18px}
+    .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .value{font-weight:800;font-variant-numeric:tabular-nums}
+
+    /* Scoring panel */
+    .scoring.card.inner{padding:12px}
+    .sc-title{font-weight:900;text-align:center;margin:0 0 6px}
+    .sc-row{display:flex;justify-content:space-between;padding:4px 2px}
+
+    /* Chart */
+    .chart-wrap{padding:8px 4px}
+    canvas{max-width:100%}
+
+    /* DataTable */
+    .table-wrap{overflow:auto}
+    table.dataTable.dkp-table thead th{white-space:nowrap}
+    table.dataTable.dkp-table td, table.dataTable.dkp-table th{vertical-align:middle}
+    table.dataTable.dkp-table td.num{ text-align:right; font-variant-numeric: tabular-nums; }
+
+    .footer{text-align:center;color:#7a8aa0;font-size:12px;margin-top:14px}
+  </style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    $(function(){
+      $('#fullTable').DataTable({
+        pageLength:10,
+        lengthMenu:[[10,20,100],[10,20,100]],
+        order:[[0,'asc']],
+        scrollX:true,
+        autoWidth:false,
+        columnDefs:[
+          { targets:[0,2,3,4,5,6,7,8], className:'num' }
+        ]
+      });
+    });
+
+    window.addEventListener('load', () => {
+      const ctx = document.getElementById('top20Chart');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ["DBsわんこ先生", "BADRO月光", "AREA88", "Flämän", "iLTWˣ", "GREGO", "笑福亭銀丸", "Mụ Q Dùng", "ᴰᴮˢ ジェダイ", "ひよこひーろー", "Tesh V2", "乄 Senator 乄", "乂 Pazzito 乂", "勝小吉", "ᴰᴮˢmattari", "Tesh V0", "ーNちゃー", "Edward  NewGate", "Invictus1888", "初代ムーパパ"],
+          datasets: [{
+            label: 'Updated_DKP',
+            data: [394191500.5, 321308279.5, 319466681.0, 274550334.5, 263707160.0, 245021737.5, 236654142.0, 233189207.0, 202477407.0, 198671348.0, 197520037.0, 167467637.0, 161044952.5, 152502848.5, 149154803.5, 148554883.0, 141178012.0, 135297475.0, 130192414.0, 124410879.0],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: {
+            legend: { display:false },
+            tooltip: {
+              callbacks: {
+                label: (c) => c.raw.toLocaleString()
+              }
             }
-            
-            .rankings-section {
-                grid-template-columns: 1fr;
+          },
+          scales: {
+            x: {
+              ticks: {
+                callback: (v)=> v.toLocaleString()
+              }
             }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .chart-container {
-                height: 400px;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .display-controls {
-                justify-content: center;
-            }
-            
-            .search-input {
-                width: 100%;
-            }
-            
-            .members-table th,
-            .members-table td {
-                padding: 8px 6px;
-                font-size: 12px;
-            }
-            
-            .name-cell {
-                max-width: 120px;
-            }
+          }
         }
-
-        .animation-fade-in {
-            animation: fadeIn 1s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: #667eea;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            font-size: 16px;
-            color: #999;
-        }
-    </style>
+      });
+    });
+  </script>
 </head>
 <body>
-    <div class="container">
-        <!-- ヘッダー -->
-        <div class="header animation-fade-in">
-            <h1>🏆 Rise of Kingdoms</h1>
-            <h2>KvK貢献度レポート</h2>
-            <p class="subtitle">王国の栄光を讃えて - 勇者たちの戦績</p>
+  <div class="container">
+    <h1>KvK Contribution Ranking 2025/11 - Heroic Anthem</h1>
+    <div class="subtitle">before: 2025/10/16 &nbsp;|&nbsp; after: 2025/11/18</div>
+
+    <!-- DKP Top10 -->
+    <div class="card">
+      <div class="bar-header">
+        <h2 style="margin:0">Updated_DKP Top 10</h2>
+        <div class="card inner scoring">
+          <div class="sc-title">DKP Scoring</div>
+          <div class="sc-row"><span>T5 kills</span><b>5 pts</b></div>
+          <div class="sc-row"><span>T4 kills</span><b>1 pt</b></div>
+          <div class="sc-row"><span>Battle deaths</span><b>15 pts</b></div>
+          <div class="sc-row"><span>Farm-account deaths</span><b>7.5 pts</b></div>
         </div>
+      </div>
+      
+      <div class="bar-row" title="DBsわんこ先生">
+        <div class="bar-label">DBsわんこ先生</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100.00%"></div></div>
+        <div class="bar-value">394,191,500</div>
+      </div>
 
-        <!-- 統計概要 -->
-        <div class="stats-overview animation-fade-in">
-            <div class="stat-card">
-                <div class="number">278</div>
-                <div class="label">総プレイヤー数</div>
-            </div>
-            <div class="stat-card">
-                <div class="number">35</div>
-                <div class="label">ファーム保有者</div>
-            </div>
-            <div class="stat-card">
-                <div class="number">465M</div>
-                <div class="label">最高DKP</div>
-            </div>
-            <div class="stat-card">
-                <div class="number">26M</div>
-                <div class="label">平均DKP</div>
-            </div>
-        </div>
 
-        <!-- メインコンテンツ -->
-        <div class="main-content">
-            <!-- DKP Top10 横棒グラフ -->
-            <div class="chart-section animation-fade-in">
-                <h2>🏆 DKP Top10 ランキング</h2>
-                <div class="chart-container">
-                    <canvas id="dkpChart"></canvas>
-                </div>
-            </div>
+      <div class="bar-row" title="BADRO月光">
+        <div class="bar-label">BADRO月光</div>
+        <div class="bar-track"><div class="bar-fill" style="width:81.51%"></div></div>
+        <div class="bar-value">321,308,279</div>
+      </div>
 
-            <!-- DKP計算式 -->
-            <div class="formula-section animation-fade-in">
-                <h3>📊 DKP計算式</h3>
-                <div class="formula">
-                    DKP = (T5撃破差分 × 5) + (T4撃破差分 × 1) + (戦死差分 × 15) + (ファーム戦死差分 × 7.5)
-                </div>
-                <div class="period-info">
-                    <strong>期間:</strong> 2025年7月8日 ～ 2025年8月6日<br>
-                    <strong>対象:</strong> 全王国メンバー 278名<br>
-                    <strong>ファーム保有者:</strong> 35名
-                </div>
-                
-                <div style="margin-top: 30px;">
-                    <h4 style="margin-bottom: 15px; color: #333;">🎯 各カテゴリの意味</h4>
-                    <div style="text-align: left; max-width: 400px; margin: 0 auto;">
-                        <p style="margin-bottom: 10px;"><strong>T5撃破:</strong> 最高ティア部隊の撃破数</p>
-                        <p style="margin-bottom: 10px;"><strong>T4撃破:</strong> 高ティア部隊の撃破数</p>
-                        <p style="margin-bottom: 10px;"><strong>戦死:</strong> 自軍の戦死数（犠牲度）</p>
-                        <p style="margin-bottom: 10px;"><strong>ファーム戦死:</strong> ファームアカウントの戦死数</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Top5ランキング -->
-        <div class="rankings-section">
-            <!-- T5撃破差分 Top5 -->
-            <div class="ranking-card t5-kills animation-fade-in">
-                <h3>🎯 T5撃破差分 Top5</h3>
-                <ul class="ranking-list" id="t5KillsList">
-                    <li class="loading">データを読み込み中...</li>
-                </ul>
-            </div>
+      <div class="bar-row" title="AREA88">
+        <div class="bar-label">AREA88</div>
+        <div class="bar-track"><div class="bar-fill" style="width:81.04%"></div></div>
+        <div class="bar-value">319,466,681</div>
+      </div>
 
-            <!-- 戦死差分 Top5 -->
-            <div class="ranking-card dead animation-fade-in">
-                <h3>⚔️ 戦死差分 Top5</h3>
-                <ul class="ranking-list" id="deadList">
-                    <li class="loading">データを読み込み中...</li>
-                </ul>
-            </div>
 
-            <!-- ファーム戦死差分 Top5 -->
-            <div class="ranking-card farm-dead animation-fade-in">
-                <h3>🏭 ファーム戦死差分 Top5</h3>
-                <ul class="ranking-list" id="farmDeadList">
-                    <li class="loading">データを読み込み中...</li>
-                </ul>
-            </div>
-        </div>
+      <div class="bar-row" title="Flämän">
+        <div class="bar-label">Flämän</div>
+        <div class="bar-track"><div class="bar-fill" style="width:69.65%"></div></div>
+        <div class="bar-value">274,550,334</div>
+      </div>
 
-        <!-- 全メンバーリスト -->
-        <div class="all-members-section animation-fade-in">
-            <h2>👥 全王国メンバー DKPランキング</h2>
-            
-            <!-- コントロール -->
-            <div class="controls">
-                <div class="display-controls">
-                    <span style="font-weight: 600; margin-right: 10px;">表示件数:</span>
-                    <button class="display-btn active" data-count="10">10件</button>
-                    <button class="display-btn" data-count="20">20件</button>
-                    <button class="display-btn" data-count="50">50件</button>
-                    <button class="display-btn" data-count="100">100件</button>
-                </div>
-                
-                <div class="search-container">
-                    <input type="text" class="search-input" placeholder="プレイヤー名で検索..." id="searchInput">
-                    <button onclick="clearSearch()" style="padding: 10px; border: none; background: #e74c3c; color: white; border-radius: 5px; cursor: pointer;">クリア</button>
-                </div>
-                
-                <div class="stats-info">
-                    <span id="displayInfo">表示: 1-10 / 278</span>
-                    <span id="searchInfo" style="display: none;"></span>
-                </div>
-            </div>
 
-            <!-- メンバーテーブル -->
-            <div class="members-table-container">
-                <table class="members-table">
-                    <thead>
-                        <tr>
-                            <th>順位</th>
-                            <th>プレイヤー名</th>
-                            <th>T4撃破差分</th>
-                            <th>T5撃破差分</th>
-                            <th>戦死差分</th>
-                            <th>ファーム戦死差分</th>
-                            <th>DKP</th>
-                        </tr>
-                    </thead>
-                    <tbody id="membersTableBody">
-                        <tr>
-                            <td colspan="7" class="loading">データを読み込み中...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="pagination" id="pagination" style="display: none;">
-                <button class="pagination-btn" id="prevBtn" onclick="changePage(-1)">前へ</button>
-                <span class="pagination-info" id="pageInfo">1 / 1</span>
-                <button class="pagination-btn" id="nextBtn" onclick="changePage(1)">次へ</button>
-            </div>
-        </div>
+      <div class="bar-row" title="iLTWˣ">
+        <div class="bar-label">iLTWˣ</div>
+        <div class="bar-track"><div class="bar-fill" style="width:66.90%"></div></div>
+        <div class="bar-value">263,707,160</div>
+      </div>
 
-        <!-- フッター -->
-        <div class="footer animation-fade-in">
-            <p>🏰 Rise of Kingdoms - 王国の栄光は永遠に 🏰</p>
-            <p>このレポートは王国メンバーの貢献を讃えるために作成されました</p>
-        </div>
+
+      <div class="bar-row" title="GREGO">
+        <div class="bar-label">GREGO</div>
+        <div class="bar-track"><div class="bar-fill" style="width:62.16%"></div></div>
+        <div class="bar-value">245,021,737</div>
+      </div>
+
+
+      <div class="bar-row" title="笑福亭銀丸">
+        <div class="bar-label">笑福亭銀丸</div>
+        <div class="bar-track"><div class="bar-fill" style="width:60.04%"></div></div>
+        <div class="bar-value">236,654,142</div>
+      </div>
+
+
+      <div class="bar-row" title="Mụ Q Dùng">
+        <div class="bar-label">Mụ Q Dùng</div>
+        <div class="bar-track"><div class="bar-fill" style="width:59.16%"></div></div>
+        <div class="bar-value">233,189,207</div>
+      </div>
+
+
+      <div class="bar-row" title="ᴰᴮˢ ジェダイ">
+        <div class="bar-label">ᴰᴮˢ ジェダイ</div>
+        <div class="bar-track"><div class="bar-fill" style="width:51.37%"></div></div>
+        <div class="bar-value">202,477,407</div>
+      </div>
+
+
+      <div class="bar-row" title="ひよこひーろー">
+        <div class="bar-label">ひよこひーろー</div>
+        <div class="bar-track"><div class="bar-fill" style="width:50.40%"></div></div>
+        <div class="bar-value">198,671,348</div>
+      </div>
+
     </div>
 
-    <script>
-        // DKP Top10データ
-        const dkpData = [
-            { name: 'しゅうまい弁当taki', dkp: 465484548 },
-            { name: '家畜人 JiNÖ', dkp: 426876855 },
-            { name: 'AREA88', dkp: 410041334 },
-            { name: 'DBsわんこ先生', dkp: 396084528 },
-            { name: 'BADRO月光', dkp: 318339954 },
-            { name: 'ᴰᴮˢiLTW', dkp: 299565663 },
-            { name: 'GREGO', dkp: 231993712 },
-            { name: '笑福亭丸銀', dkp: 224891560 },
-            { name: 'ᴰᴮˢmattari', dkp: 218863604 },
-            { name: 'Mụ Q Dùng', dkp: 215116337 }
-        ];
+    <!-- TOP5 cards -->
+    <div class="card">
+      <div class="grid3">
 
-        const t5KillsData = [
-            { name: 'しゅうまい弁当taki', value: 82689911 },
-            { name: '家畜人 JiNÖ', value: 74292923 },
-            { name: 'AREA88', value: 72939066 },
-            { name: 'DBsわんこ先生', value: 57639643 },
-            { name: 'ᴰᴮˢiLTW', value: 56403441 }
-        ];
-
-        const deadData = [
-            { name: 'DBsわんこ先生', value: 3437469 },
-            { name: '笑福亭丸銀', value: 3306181 },
-            { name: 'DBsにゃんこ先生', value: 2569461 },
-            { name: 'Mụ Q Dùng', value: 2210381 },
-            { name: 'しゅうまい弁当taki', value: 2040452 }
-        ];
-
-        const farmDeadData = [
-            { name: 'DBsわんこ先生', value: 4568466 },
-            { name: '初代ムーパパ', value: 2732706 },
-            { name: '家畜人 JiNÖ', value: 2656478 },
-            { name: '勝小吉', value: 2628383 },
-            { name: 'ᴰᴮᶳﾗﾝﾗﾝ', value: 2127766 }
-        ];
-
-        // 全メンバーデータ（CSVから読み込んだデータ）
-        const allMembersData = [
+        <div class="card inner">
+          <div class="card-title">🚀 T5 Kill Diff Top 5</div>
+          <div class="rows">
+            
+          <div class="row" title="DBsわんこ先生">
+            <div class="rank">🥇</div>
+            <div class="name">DBsわんこ先生</div>
+            <div class="value">64,474,320</div>
+          </div>
 
 
-            {"rank": 1, "name": "しゅうまい弁当taki", "t4_kills": 21428213, "t5_kills": 82689911, "dead": 2040452, "farm_dead": 0.0, "dkp": 465484548.0},
-            {"rank": 2, "name": "家畜人 JiNÖ", "t4_kills": 15528140, "t5_kills": 74292923, "dead": 1330701, "farm_dead": 2656478.0, "dkp": 426876855.0},
-            {"rank": 3, "name": "AREA88", "t4_kills": 18496927, "t5_kills": 72939066, "dead": 1407444, "farm_dead": 764989.0, "dkp": 410041334.5},
-            {"rank": 4, "name": "DBsわんこ先生", "t4_kills": 22060783, "t5_kills": 57639643, "dead": 3437469, "farm_dead": 4568466.0, "dkp": 396084528.0},
-            {"rank": 5, "name": "BADRO月光", "t4_kills": 13459316, "t5_kills": 53359675, "dead": 1686609, "farm_dead": 1704417.0, "dkp": 318339953.5},
-            {"rank": 6, "name": "ᴰᴮˢiLTW", "t4_kills": 11414928, "t5_kills": 56403441, "dead": 408902, "farm_dead": 0.0, "dkp": 299565663.0},
-            {"rank": 7, "name": "GREGO", "t4_kills": 11816345, "t5_kills": 38144291, "dead": 1441465, "farm_dead": 1044525.0, "dkp": 231993712.5},
-            {"rank": 8, "name": "笑福亭丸銀", "t4_kills": 12327867, "t5_kills": 32338378, "dead": 3306181, "farm_dead": 170545.0, "dkp": 224891559.5},
-            {"rank": 9, "name": "ᴰᴮˢmattari", "t4_kills": 10423606, "t5_kills": 35582278, "dead": 1261646, "farm_dead": 1547189.0, "dkp": 218863603.5},
-            {"rank": 10, "name": "Mụ Q Dùng", "t4_kills": 8597212, "t5_kills": 34557689, "dead": 2210381, "farm_dead": 76662.0, "dkp": 215116337.0},
-            {"rank": 11, "name": "乄 Senator 乄", "t4_kills": 8526328, "t5_kills": 32232133, "dead": 1481987, "farm_dead": 0.0, "dkp": 191916798.0},
-            {"rank": 12, "name": "木枯らしもんじゅうろう", "t4_kills": 9528684, "t5_kills": 29565890, "dead": 1484679, "farm_dead": 998931.0, "dkp": 187120301.5},
-            {"rank": 13, "name": "Tesh V2", "t4_kills": 9856085, "t5_kills": 30790524, "dead": 915092, "farm_dead": 0.0, "dkp": 177535085.0},
-            {"rank": 14, "name": "ひよこひーろー", "t4_kills": 7344167, "t5_kills": 30388719, "dead": 839931, "farm_dead": 680372.0, "dkp": 176989517.0},
-            {"rank": 15, "name": "Invictus1888", "t4_kills": 7896790, "t5_kills": 22709825, "dead": 1925137, "farm_dead": 220297.0, "dkp": 151975197.5},
-            {"rank": 16, "name": "アンパンチ0630", "t4_kills": 7836591, "t5_kills": 22850841, "dead": 1627781, "farm_dead": 294548.0, "dkp": 148716621.0},
-            {"rank": 17, "name": "Edward NewGate", "t4_kills": 6298384, "t5_kills": 22284997, "dead": 1942984, "farm_dead": 0.0, "dkp": 146868129.0},
-            {"rank": 18, "name": "初代ムーパパ", "t4_kills": 9092443, "t5_kills": 14552884, "dead": 1433767, "farm_dead": 2732706.0, "dkp": 123858663.0},
-            {"rank": 19, "name": "ᴰᴮᶳﾗﾝﾗﾝ", "t4_kills": 8531587, "t5_kills": 13182524, "dead": 1830318, "farm_dead": 2127766.0, "dkp": 117857222.0},
-            {"rank": 20, "name": "すだこ", "t4_kills": 9698170, "t5_kills": 15705968, "dead": 1278163, "farm_dead": 914867.0, "dkp": 114261957.5},
-            {"rank": 21, "name": "KK親父KK", "t4_kills": 4568661, "t5_kills": 13516145, "dead": 1568539, "farm_dead": 980357.0, "dkp": 103030148.5},
-            {"rank": 22, "name": "ᴰᴮˢZunさん", "t4_kills": 3861142, "t5_kills": 17763310, "dead": 513065, "farm_dead": 35368.0, "dkp": 100638927.0},
-            {"rank": 23, "name": "ᴰᴮˢアオクマ", "t4_kills": 3785161, "t5_kills": 13154276, "dead": 882281, "farm_dead": 1015380.0, "dkp": 90406106.0},
-            {"rank": 24, "name": "DBsにゃんこ先生", "t4_kills": 4620151, "t5_kills": 8970001, "dead": 2569461, "farm_dead": 0.0, "dkp": 88012071.0},
-            {"rank": 25, "name": "勝小吉", "t4_kills": 4171671, "t5_kills": 8252977, "dead": 1407263, "farm_dead": 2628383.0, "dkp": 86258373.5},
-            {"rank": 26, "name": "black foot S", "t4_kills": 3652108, "t5_kills": 14540994, "dead": 578567, "farm_dead": 0.0, "dkp": 85035583.0},
-            {"rank": 27, "name": "ᴰᴿzaza", "t4_kills": 4094874, "t5_kills": 12246169, "dead": 1277662, "farm_dead": 0.0, "dkp": 84490649.0},
-            {"rank": 28, "name": "AhmadSn", "t4_kills": 4981758, "t5_kills": 11376499, "dead": 1352920, "farm_dead": 26378.0, "dkp": 82355888.0},
-            {"rank": 29, "name": "ᴰᴮᶳじん太", "t4_kills": 3082248, "t5_kills": 9533460, "dead": 1729309, "farm_dead": 748527.0, "dkp": 82303135.5},
-            {"rank": 30, "name": "くそKAERU", "t4_kills": 4215588, "t5_kills": 11254518, "dead": 1202252, "farm_dead": 0.0, "dkp": 78521958.0},
-            {"rank": 31, "name": "亗pote sara亗", "t4_kills": 3840600, "t5_kills": 10838663, "dead": 885938, "farm_dead": 698910.0, "dkp": 76564810.0},
-            {"rank": 32, "name": "噂のいしぐん", "t4_kills": 4117596, "t5_kills": 7821307, "dead": 1641294, "farm_dead": 0.0, "dkp": 67843541.0},
-            {"rank": 33, "name": "ᴰᴮsみすたーKJ", "t4_kills": 3247549, "t5_kills": 9870431, "dead": 323327, "farm_dead": 64201.0, "dkp": 57931116.5},
-            {"rank": 34, "name": "たいぞう", "t4_kills": 2258801, "t5_kills": 9186267, "dead": 519890, "farm_dead": 121638.0, "dkp": 56900771.0},
-            {"rank": 35, "name": "B u Z Z e r", "t4_kills": 2261087, "t5_kills": 7673391, "dead": 1012725, "farm_dead": 0.0, "dkp": 55818917.0},
-            {"rank": 36, "name": "LーELF", "t4_kills": 2421774, "t5_kills": 7250156, "dead": 1117247, "farm_dead": 0.0, "dkp": 55431259.0},
-            {"rank": 37, "name": "ᴷˣLEGACY", "t4_kills": 2974917, "t5_kills": 5483222, "dead": 1324187, "farm_dead": 428775.0, "dkp": 53469644.5},
-            {"rank": 38, "name": "ᴾᴴGodLuvzÜ", "t4_kills": 3101432, "t5_kills": 6541555, "dead": 1103232, "farm_dead": 4432.0, "dkp": 52390927.0},
-            {"rank": 39, "name": "ᴳᴰ kinari", "t4_kills": 2341008, "t5_kills": 7137961, "dead": 840789, "farm_dead": 226311.0, "dkp": 52339980.5},
-            {"rank": 40, "name": "DBSねね", "t4_kills": 2465162, "t5_kills": 6480540, "dead": 853948, "farm_dead": 29679.0, "dkp": 47899674.5},
-            {"rank": 41, "name": "コロスケナリ", "t4_kills": 1911538, "t5_kills": 4565838, "dead": 1431738, "farm_dead": 21319.0, "dkp": 46376690.5},
-            {"rank": 42, "name": "お菊のさら", "t4_kills": 1977569, "t5_kills": 5751451, "dead": 955208, "farm_dead": 23883.0, "dkp": 45242066.5},
-            {"rank": 43, "name": "ᴰᴮˢnull", "t4_kills": 1158264, "t5_kills": 2752239, "dead": 1977870, "farm_dead": 0.0, "dkp": 44587509.0},
-            {"rank": 44, "name": "しんなり", "t4_kills": 2198052, "t5_kills": 4962114, "dead": 1117321, "farm_dead": 0.0, "dkp": 43768437.0},
-            {"rank": 45, "name": "ᴰᴮˢ剣八", "t4_kills": 1391435, "t5_kills": 4237414, "dead": 1235794, "farm_dead": 0.0, "dkp": 41115415.0},
-            {"rank": 46, "name": "たけたか", "t4_kills": 1572287, "t5_kills": 3449978, "dead": 1142257, "farm_dead": 0.0, "dkp": 35956032.0},
-            {"rank": 47, "name": "kiyon07", "t4_kills": 620943, "t5_kills": 1456227, "dead": 1854747, "farm_dead": 0.0, "dkp": 35723283.0},
-            {"rank": 48, "name": "魁ゆきJapan魁", "t4_kills": 1744527, "t5_kills": 4188936, "dead": 714211, "farm_dead": 5431.0, "dkp": 33443104.5},
-            {"rank": 49, "name": "メガンテ", "t4_kills": 2237293, "t5_kills": 2584096, "dead": 1215181, "farm_dead": 0.0, "dkp": 33385488.0},
-            {"rank": 50, "name": "PAMU pi", "t4_kills": 2002445, "t5_kills": 3994665, "dead": 730595, "farm_dead": 0.0, "dkp": 32934695.0},
-            {"rank": 51, "name": "もんちゃん", "t4_kills": 1656288, "t5_kills": 2840705, "dead": 998931, "farm_dead": 0.0, "dkp": 30843778.0},
-            {"rank": 52, "name": "ᴰᴮˢ khang", "t4_kills": 2990256, "t5_kills": 1419836, "dead": 1002279, "farm_dead": 187632.0, "dkp": 26530861.0},
-            {"rank": 53, "name": "ᴰᴮᶳゆたそん", "t4_kills": 2969807, "t5_kills": 2498170, "dead": 657059, "farm_dead": 8536.0, "dkp": 25380562.0},
-            {"rank": 54, "name": "ﾄﾓﾓﾓﾓﾝ", "t4_kills": 1495073, "t5_kills": 2611855, "dead": 644520, "farm_dead": 0.0, "dkp": 24222148.0},
-            {"rank": 55, "name": "Gsub1", "t4_kills": 1087714, "t5_kills": 1170997, "dead": 1044525, "farm_dead": 0.0, "dkp": 22610574.0},
-            {"rank": 56, "name": "チームメンヘラ", "t4_kills": 581720, "t5_kills": 1487967, "dead": 897574, "farm_dead": 0.0, "dkp": 21485165.0},
-            {"rank": 57, "name": "small Badro", "t4_kills": 595702, "t5_kills": 827498, "dead": 1042487, "farm_dead": 0.0, "dkp": 20370497.0},
-            {"rank": 58, "name": "Mustafa KG", "t4_kills": 618305, "t5_kills": 3188021, "dead": 215931, "farm_dead": 0.0, "dkp": 19797375.0},
-            {"rank": 59, "name": "隣のJiNOの", "t4_kills": 689584, "t5_kills": 538802, "dead": 994837, "farm_dead": 0.0, "dkp": 18306149.0},
-            {"rank": 60, "name": "ᴰᴮˢRanran", "t4_kills": 317403, "t5_kills": 597365, "dead": 995448, "farm_dead": 0.0, "dkp": 18235948.0},
-            {"rank": 61, "name": "バスケットマンSC", "t4_kills": 45436, "t5_kills": 290626, "dead": 1056801, "farm_dead": 0.0, "dkp": 17350581.0},
-            {"rank": 62, "name": "勝新太郎", "t4_kills": 453368, "t5_kills": 830158, "dead": 727974, "farm_dead": 0.0, "dkp": 15523768.0},
-            {"rank": 63, "name": "ᴰᴮˢポコ", "t4_kills": 724647, "t5_kills": 2382806, "dead": 166615, "farm_dead": 0.0, "dkp": 15137902.0},
-            {"rank": 64, "name": "団長クロロルシルフル", "t4_kills": 677478, "t5_kills": 1740186, "dead": 344666, "farm_dead": 10498.0, "dkp": 14627133.0},
-            {"rank": 65, "name": "亗ぽてぽて亗", "t4_kills": 635258, "t5_kills": 743169, "dead": 675981, "farm_dead": 0.0, "dkp": 14490818.0},
-            {"rank": 66, "name": "まったり貯金箱", "t4_kills": 661137, "t5_kills": 511038, "dead": 742453, "farm_dead": 0.0, "dkp": 14353122.0},
-            {"rank": 67, "name": "ᴰᴮˢ匠栞5", "t4_kills": 487583, "t5_kills": 1375909, "dead": 362951, "farm_dead": 45383.0, "dkp": 13151765.5},
-            {"rank": 68, "name": "ᴰᴮˢ ジェダイ", "t4_kills": 366405, "t5_kills": 1159870, "dead": 446633, "farm_dead": 0.0, "dkp": 12865250.0},
-            {"rank": 69, "name": "ʚちゃんコキチちゃんɞ", "t4_kills": 492268, "t5_kills": 618902, "dead": 617892, "farm_dead": 0.0, "dkp": 12855158.0},
-            {"rank": 70, "name": "まったり覆面マン", "t4_kills": 595576, "t5_kills": 367944, "dead": 685867, "farm_dead": 0.0, "dkp": 12723301.0},
-            {"rank": 71, "name": "アヒルヒーロー", "t4_kills": 414086, "t5_kills": 388064, "dead": 680372, "farm_dead": 0.0, "dkp": 12559986.0},
-            {"rank": 72, "name": "ムーパパジュニア", "t4_kills": 556837, "t5_kills": 495256, "dead": 602668, "farm_dead": 0.0, "dkp": 12073137.0},
-            {"rank": 73, "name": "kokichi miller", "t4_kills": 525267, "t5_kills": 625690, "dead": 554644, "farm_dead": 0.0, "dkp": 11973377.0},
-            {"rank": 74, "name": "wanko先生sub2", "t4_kills": 511031, "t5_kills": 633086, "dead": 551583, "farm_dead": 0.0, "dkp": 11950206.0},
-            {"rank": 75, "name": "BADRO fm", "t4_kills": 276966, "t5_kills": 584950, "dead": 580835, "farm_dead": 0.0, "dkp": 11914241.0},
-            {"rank": 76, "name": "capitangoon", "t4_kills": 845112, "t5_kills": 1755901, "dead": 105012, "farm_dead": 0.0, "dkp": 11199797.0},
-            {"rank": 77, "name": "4代目JiNOず", "t4_kills": 459346, "t5_kills": 276325, "dead": 599777, "farm_dead": 0.0, "dkp": 10837626.0},
-            {"rank": 78, "name": "ʏᴅわんこ先生", "t4_kills": 367797, "t5_kills": 478828, "dead": 523708, "farm_dead": 0.0, "dkp": 10617557.0},
-            {"rank": 79, "name": "嘘泣き乄りむるん", "t4_kills": 591513, "t5_kills": 1747011, "dead": 67732, "farm_dead": 0.0, "dkp": 10342548.0},
-            {"rank": 80, "name": "エリアS", "t4_kills": 611305, "t5_kills": 434448, "dead": 481594, "farm_dead": 0.0, "dkp": 10007455.0},
-            {"rank": 81, "name": "アオクマAoo", "t4_kills": 602697, "t5_kills": 202551, "dead": 537037, "farm_dead": 0.0, "dkp": 9671007.0},
-            {"rank": 82, "name": "天くんlaundry", "t4_kills": 616693, "t5_kills": 566222, "dead": 406033, "farm_dead": 0.0, "dkp": 9538298.0},
-            {"rank": 83, "name": "siri上がりノJiNO", "t4_kills": 403971, "t5_kills": 246316, "dead": 486252, "farm_dead": 0.0, "dkp": 8929331.0},
-            {"rank": 84, "name": "じん太2", "t4_kills": 289495, "t5_kills": 295282, "dead": 469240, "farm_dead": 0.0, "dkp": 8804505.0},
-            {"rank": 85, "name": "ᴰᴮˢ puppet", "t4_kills": 312227, "t5_kills": 737146, "dead": 297041, "farm_dead": 0.0, "dkp": 8453572.0},
-            {"rank": 86, "name": "アオクマサブ", "t4_kills": 418880, "t5_kills": 183442, "dead": 446709, "farm_dead": 0.0, "dkp": 8036725.0},
-            {"rank": 87, "name": "Lan kokichi", "t4_kills": 139196, "t5_kills": 421122, "dead": 376412, "farm_dead": 0.0, "dkp": 7890986.0},
-            {"rank": 88, "name": "わんこ先生Sub1", "t4_kills": 229736, "t5_kills": 367307, "dead": 339205, "farm_dead": 0.0, "dkp": 7154346.0},
-            {"rank": 89, "name": "wanko先生sub7", "t4_kills": 234294, "t5_kills": 402560, "dead": 319244, "farm_dead": 0.0, "dkp": 7035754.0},
-            {"rank": 90, "name": "どんまいコキチ", "t4_kills": 156833, "t5_kills": 205956, "dead": 351461, "farm_dead": 0.0, "dkp": 6458528.0},
-            {"rank": 91, "name": "みずだこ", "t4_kills": 300619, "t5_kills": 222240, "dead": 326547, "farm_dead": 0.0, "dkp": 6310024.0},
-            {"rank": 92, "name": "5代目JiNOず", "t4_kills": 341487, "t5_kills": 290704, "dead": 293822, "farm_dead": 0.0, "dkp": 6202337.0},
-            {"rank": 93, "name": "コテ名人", "t4_kills": 217448, "t5_kills": 305352, "dead": 294548, "farm_dead": 0.0, "dkp": 6162428.0},
-            {"rank": 94, "name": "ᴰᴮˢ心壱", "t4_kills": 61514, "t5_kills": 397031, "dead": 272493, "farm_dead": 0.0, "dkp": 6134064.0},
-            {"rank": 95, "name": "れがサムライ", "t4_kills": 162808, "t5_kills": 131123, "dead": 325128, "farm_dead": 0.0, "dkp": 5695343.0},
-            {"rank": 96, "name": "moominmama", "t4_kills": 256242, "t5_kills": 223748, "dead": 270337, "farm_dead": 0.0, "dkp": 5430037.0},
-            {"rank": 97, "name": "Invictus Farmer", "t4_kills": 143299, "t5_kills": 387852, "dead": 220297, "farm_dead": 0.0, "dkp": 5387014.0},
-            {"rank": 98, "name": "Pen太", "t4_kills": 316251, "t5_kills": 186800, "dead": 273322, "farm_dead": 0.0, "dkp": 5350081.0},
-            {"rank": 99, "name": "巷のJiNO", "t4_kills": 247386, "t5_kills": 158327, "dead": 281790, "farm_dead": 0.0, "dkp": 5265871.0},
-            {"rank": 100, "name": "wanko先生sub1", "t4_kills": 130351, "t5_kills": 182889, "dead": 265265, "farm_dead": 0.0, "dkp": 5023771.0},
-            {"rank": 101, "name": "kinӓЯi", "t4_kills": 285098, "t5_kills": 245624, "dead": 226311, "farm_dead": 0.0, "dkp": 4907883.0},
-            {"rank": 102, "name": "乂 3zra2il 乂", "t4_kills": 97327, "t5_kills": 187336, "dead": 221454, "farm_dead": 0.0, "dkp": 4355817.0},
-            {"rank": 103, "name": "Ränän farm", "t4_kills": 173364, "t5_kills": 167128, "dead": 220456, "farm_dead": 0.0, "dkp": 4315844.0},
-            {"rank": 104, "name": "Muhammad ツ", "t4_kills": 115194, "t5_kills": 250320, "dead": 191246, "farm_dead": 0.0, "dkp": 4235484.0},
-            {"rank": 105, "name": "groni56", "t4_kills": 177, "t5_kills": 22651, "dead": 263345, "farm_dead": 0.0, "dkp": 4063607.0},
-            {"rank": 106, "name": "khang 62", "t4_kills": 213913, "t5_kills": 168631, "dead": 187632, "farm_dead": 0.0, "dkp": 3871548.0},
-            {"rank": 107, "name": "Muhammad 亗", "t4_kills": 232519, "t5_kills": 94153, "dead": 205065, "farm_dead": 0.0, "dkp": 3779259.0},
-            {"rank": 108, "name": "笑福亭サブ", "t4_kills": 297923, "t5_kills": 179236, "dead": 170545, "farm_dead": 0.0, "dkp": 3752278.0},
-            {"rank": 109, "name": "やきだこ", "t4_kills": 199894, "t5_kills": 102540, "dead": 202613, "farm_dead": 0.0, "dkp": 3751789.0},
-            {"rank": 110, "name": "エリアS88", "t4_kills": 151503, "t5_kills": 107363, "dead": 197741, "farm_dead": 0.0, "dkp": 3654433.0},
-            {"rank": 111, "name": "レガシー忍者", "t4_kills": 236794, "t5_kills": 353166, "dead": 103647, "farm_dead": 0.0, "dkp": 3557329.0},
-            {"rank": 112, "name": "Řanran farm", "t4_kills": 142067, "t5_kills": 101275, "dead": 160076, "farm_dead": 0.0, "dkp": 3049582.0},
-            {"rank": 113, "name": "あげだこ", "t4_kills": 130112, "t5_kills": 160530, "dead": 127550, "farm_dead": 0.0, "dkp": 2846012.0},
-            {"rank": 114, "name": "いいだこ", "t4_kills": 217442, "t5_kills": 177177, "dead": 115272, "farm_dead": 0.0, "dkp": 2832407.0},
-            {"rank": 115, "name": "ᴾʸRañran", "t4_kills": 51586, "t5_kills": 74080, "dead": 155786, "farm_dead": 0.0, "dkp": 2758776.0},
-            {"rank": 116, "name": "まだこ", "t4_kills": 169197, "t5_kills": 195743, "dead": 96723, "farm_dead": 0.0, "dkp": 2427338.0},
-            {"rank": 117, "name": "ᴰᴮˢ匠栞6", "t4_kills": 99088, "t5_kills": 126624, "dead": 129688, "farm_dead": 0.0, "dkp": 2077952.0},
-            {"rank": 118, "name": "ᴰᴮˢ匠栞4", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 119, "name": "ᴰᴮˢ匠栞3", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 120, "name": "ᴰᴮˢ匠栞2", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 121, "name": "ᴰᴮˢ匠栞1", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 122, "name": "ᴰᴮˢ匠栞", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 123, "name": "ᴰᴮˢ匠栞7", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 124, "name": "ᴰᴮˢ匠栞8", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 125, "name": "ᴰᴮˢ匠栞9", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 126, "name": "ᴰᴮˢ匠栞10", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 127, "name": "ᴰᴮˢ匠栞11", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 128, "name": "ᴰᴮˢ匠栞12", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 129, "name": "ᴰᴮˢ匠栞13", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 130, "name": "ᴰᴮˢ匠栞14", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 131, "name": "ᴰᴮˢ匠栞15", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 132, "name": "ᴰᴮˢ匠栞16", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 133, "name": "ᴰᴮˢ匠栞17", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 134, "name": "ᴰᴮˢ匠栞18", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 135, "name": "ᴰᴮˢ匠栞19", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 136, "name": "ᴰᴮˢ匠栞20", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 137, "name": "ᴰᴮˢ匠栞21", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 138, "name": "ᴰᴮˢ匠栞22", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 139, "name": "ᴰᴮˢ匠栞23", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 140, "name": "ᴰᴮˢ匠栞24", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 141, "name": "ᴰᴮˢ匠栞25", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 142, "name": "ᴰᴮˢ匠栞26", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 143, "name": "ᴰᴮˢ匠栞27", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 144, "name": "ᴰᴮˢ匠栞28", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 145, "name": "ᴰᴮˢ匠栞29", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 146, "name": "ᴰᴮˢ匠栞30", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 147, "name": "ᴰᴮˢ匠栞31", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 148, "name": "ᴰᴮˢ匠栞32", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 149, "name": "ᴰᴮˢ匠栞33", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 150, "name": "ᴰᴮˢ匠栞34", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 151, "name": "ᴰᴮˢ匠栞35", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 152, "name": "ᴰᴮˢ匠栞36", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 153, "name": "ᴰᴮˢ匠栞37", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 154, "name": "ᴰᴮˢ匠栞38", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 155, "name": "ᴰᴮˢ匠栞39", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 156, "name": "ᴰᴮˢ匠栞40", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 157, "name": "ᴰᴮˢ匠栞41", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 158, "name": "ᴰᴮˢ匠栞42", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 159, "name": "ᴰᴮˢ匠栞43", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 160, "name": "ᴰᴮˢ匠栞44", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 161, "name": "ᴰᴮˢ匠栞45", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 162, "name": "ᴰᴮˢ匠栞46", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 163, "name": "ᴰᴮˢ匠栞47", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 164, "name": "ᴰᴮˢ匠栞48", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 165, "name": "ᴰᴮˢ匠栞49", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 166, "name": "ᴰᴮˢ匠栞50", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 167, "name": "ᴰᴮˢ匠栞51", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 168, "name": "ᴰᴮˢ匠栞52", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 169, "name": "ᴰᴮˢ匠栞53", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 170, "name": "ᴰᴮˢ匠栞54", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 171, "name": "ᴰᴮˢ匠栞55", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 172, "name": "ᴰᴮˢ匠栞56", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 173, "name": "ᴰᴮˢ匠栞57", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 174, "name": "ᴰᴮˢ匠栞58", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 175, "name": "ᴰᴮˢ匠栞59", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 176, "name": "ᴰᴮˢ匠栞60", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 177, "name": "ᴰᴮˢ匠栞61", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 178, "name": "ᴰᴮˢ匠栞62", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 179, "name": "ᴰᴮˢ匠栞63", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 180, "name": "ᴰᴮˢ匠栞64", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 181, "name": "ᴰᴮˢ匠栞65", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 182, "name": "ᴰᴮˢ匠栞66", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 183, "name": "ᴰᴮˢ匠栞67", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 184, "name": "ᴰᴮˢ匠栞68", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 185, "name": "ᴰᴮˢ匠栞69", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 186, "name": "ᴰᴮˢ匠栞70", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 187, "name": "ᴰᴮˢ匠栞71", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 188, "name": "ᴰᴮˢ匠栞72", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 189, "name": "ᴰᴮˢ匠栞73", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 190, "name": "ᴰᴮˢ匠栞74", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 191, "name": "ᴰᴮˢ匠栞75", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 192, "name": "ᴰᴮˢ匠栞76", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 193, "name": "ᴰᴮˢ匠栞77", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 194, "name": "ᴰᴮˢ匠栞78", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 195, "name": "ᴰᴮˢ匠栞79", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 196, "name": "ᴰᴮˢ匠栞80", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 197, "name": "ᴰᴮˢ匠栞81", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 198, "name": "ᴰᴮˢ匠栞82", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 199, "name": "ᴰᴮˢ匠栞83", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 200, "name": "ᴰᴮˢ匠栞84", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 201, "name": "ᴰᴮˢ匠栞85", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 202, "name": "ᴰᴮˢ匠栞86", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 203, "name": "ᴰᴮˢ匠栞87", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 204, "name": "ᴰᴮˢ匠栞88", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 205, "name": "ᴰᴮˢ匠栞89", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 206, "name": "ᴰᴮˢ匠栞90", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 207, "name": "ᴰᴮˢ匠栞91", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 208, "name": "ᴰᴮˢ匠栞92", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 209, "name": "ᴰᴮˢ匠栞93", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 210, "name": "ᴰᴮˢ匠栞94", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 211, "name": "ᴰᴮˢ匠栞95", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 212, "name": "ᴰᴮˢ匠栞96", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 213, "name": "ᴰᴮˢ匠栞97", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 214, "name": "ᴰᴮˢ匠栞98", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 215, "name": "ᴰᴮˢ匠栞99", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 216, "name": "ᴰᴮˢ匠栞100", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 217, "name": "ᴰᴮˢ匠栞101", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 218, "name": "ᴰᴮˢ匠栞102", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 219, "name": "ᴰᴮˢ匠栞103", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 220, "name": "ᴰᴮˢ匠栞104", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 221, "name": "ᴰᴮˢ匠栞105", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 222, "name": "ᴰᴮˢ匠栞106", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 223, "name": "ᴰᴮˢ匠栞107", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 224, "name": "ᴰᴮˢ匠栞108", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 225, "name": "ᴰᴮˢ匠栞109", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 226, "name": "ᴰᴮˢ匠栞110", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 227, "name": "ᴰᴮˢ匠栞111", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 228, "name": "ᴰᴮˢ匠栞112", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 229, "name": "ᴰᴮˢ匠栞113", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 230, "name": "ᴰᴮˢ匠栞114", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 231, "name": "ᴰᴮˢ匠栞115", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 232, "name": "ᴰᴮˢ匠栞116", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 233, "name": "ᴰᴮˢ匠栞117", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 234, "name": "ᴰᴮˢ匠栞118", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 235, "name": "ᴰᴮˢ匠栞119", "t4_kills": 88503, "t5_kills": 115272, "dead": 127550, "farm_dead": 0.0, "dkp": 2001363.0},
-            {"rank": 236, "name": "乙杯紋三郎", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 237, "name": "乙杯紋三郎", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 238, "name": "ブッティ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 239, "name": "乙杯紋四郎", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 240, "name": "乙杯紋六郎", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 241, "name": "SL KING RAWANA1", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 242, "name": "農民だよ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 243, "name": "Itxaso", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 244, "name": "Ranřǎn farm", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 245, "name": "AREAサブ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 246, "name": "ᴶᴺ ハン・ソロ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 247, "name": "モーンちゃん", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 248, "name": "ᴶᴺ ヨーダ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 249, "name": "V 肥啊肥啊", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 250, "name": "ᴰᴮˢSPACE", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 251, "name": "バフ要員", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 252, "name": "MXM IL GRANDE", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 253, "name": "ᵏ ˣすだこ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 254, "name": "Babbby", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 255, "name": "ᴵᶠ Zunさん", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 256, "name": "コロッケなり", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 257, "name": "武将レガ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 258, "name": "ブルックFS", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 259, "name": "kiyon09", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 260, "name": "ポコの助", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 261, "name": "みすたーファーム", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 262, "name": "みすたーYSG", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 263, "name": "テシーF1", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 264, "name": "ᴶᴺ ウィンドウ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 265, "name": "ᴿᴬ puppet b", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 266, "name": "ねねのお友達", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 267, "name": "みすたーK", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 268, "name": "ᴶᴺ puppet j", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 269, "name": "しんなり2940", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 270, "name": "JS7", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 271, "name": "ᴹᶠすだこ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 272, "name": "みすたーJK3", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 273, "name": "ブルックFG", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 274, "name": "みすたー熊五郎", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 275, "name": "バスケットマンSC3", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 276, "name": "もすたーKJ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 277, "name": "マチ コマチネ", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0},
-            {"rank": 278, "name": "ᴷˣchipaちぱ姫", "t4_kills": 0, "t5_kills": 0, "dead": 0, "farm_dead": 0.0, "dkp": 0.0}
-        ];
+          <div class="row" title="AREA88">
+            <div class="rank">🥈</div>
+            <div class="name">AREA88</div>
+            <div class="value">57,920,630</div>
+          </div>
 
-        // グローバル変数
-        let currentDisplayCount = 10;
-        let currentPage = 1;
-        let filteredData = allMembersData;
-        let searchTerm = '';
 
-        // DKP横棒グラフを作成
-        function createDKPChart() {
-            const ctx = document.getElementById('dkpChart').getContext('2d');
-            
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dkpData.map((item, index) => `${index + 1}. ${item.name}`),
-                    datasets: [{
-                        label: 'DKP',
-                        data: dkpData.map(item => item.dkp),
-                        backgroundColor: [
-                            '#FFD700', '#C0C0C0', '#CD7F32', '#667eea', '#764ba2',
-                            '#4CAF50', '#FF5722', '#9C27B0', '#FF9800', '#2196F3'
-                        ],
-                        borderColor: [
-                            '#FFB000', '#A0A0A0', '#AD5F12', '#4a5cca', '#5a3b82',
-                            '#2C8F30', '#D32F02', '#7B1FA2', '#F57C00', '#1976D2'
-                        ],
-                        borderWidth: 2,
-                        borderRadius: 5
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `DKP: ${context.parsed.x.toLocaleString()}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return (value / 1000000).toFixed(0) + 'M';
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    animation: {
-                        duration: 2000,
-                        easing: 'easeOutQuart'
-                    }
-                }
-            });
-        }
+          <div class="row" title="BADRO月光">
+            <div class="rank">🥉</div>
+            <div class="name">BADRO月光</div>
+            <div class="value">52,126,723</div>
+          </div>
 
-        // ランキングリストを作成
-        function createRankingList(containerId, data, formatValue = (value) => value.toLocaleString()) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            
-            data.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.className = `ranking-item rank-${index + 1}`;
-                li.innerHTML = `
-                    <div class="rank-info">
-                        <span class="rank-number">${index + 1}</span>
-                        <span class="player-name">${item.name}</span>
-                    </div>
-                    <span class="score">${formatValue(item.value)}</span>
-                `;
-                container.appendChild(li);
-            });
-        }
 
-        // 全メンバーテーブルを更新
-        function updateMembersTable() {
-            const tbody = document.getElementById('membersTableBody');
-            const startIndex = (currentPage - 1) * currentDisplayCount;
-            const endIndex = Math.min(startIndex + currentDisplayCount, filteredData.length);
-            const pageData = filteredData.slice(startIndex, endIndex);
-            
-            tbody.innerHTML = '';
-            
-            if (pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="no-results">検索結果が見つかりません</td></tr>';
-                return;
-            }
-            
-            pageData.forEach(player => {
-                const row = document.createElement('tr');
-                
-                // TOP3とTOP10のクラスを追加
-                if (player.rank <= 3) {
-                    row.classList.add('top3');
-                } else if (player.rank <= 10) {
-                    row.classList.add('top10');
-                }
-                
-                row.innerHTML = `
-                    <td class="rank-cell">
-                        ${player.rank <= 3 ? `<span class="badge badge-${player.rank === 1 ? 'gold' : player.rank === 2 ? 'silver' : 'bronze'}">${player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : '🥉'}</span>` : ''}
-                        ${player.rank}
-                    </td>
-                    <td class="name-cell">${player.name}</td>
-                    <td class="number-cell">${player.t4_kills.toLocaleString()}</td>
-                    <td class="number-cell">${player.t5_kills.toLocaleString()}</td>
-                    <td class="number-cell">${player.dead.toLocaleString()}</td>
-                    <td class="number-cell">${player.farm_dead.toLocaleString()}</td>
-                    <td class="dkp-cell">${Math.round(player.dkp).toLocaleString()}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-            
-            updateDisplayInfo();
-            updatePagination();
-        }
+          <div class="row" title="iLTWˣ">
+            <div class="rank">🏅</div>
+            <div class="name">iLTWˣ</div>
+            <div class="value">51,777,674</div>
+          </div>
 
-        // 表示情報を更新
-        function updateDisplayInfo() {
-            const startIndex = (currentPage - 1) * currentDisplayCount + 1;
-            const endIndex = Math.min(currentPage * currentDisplayCount, filteredData.length);
-            const displayInfo = document.getElementById('displayInfo');
-            const searchInfo = document.getElementById('searchInfo');
-            
-            displayInfo.textContent = `表示: ${startIndex}-${endIndex} / ${filteredData.length}`;
-            
-            if (searchTerm) {
-                searchInfo.textContent = `"${searchTerm}" の検索結果`;
-                searchInfo.style.display = 'inline';
-            } else {
-                searchInfo.style.display = 'none';
-            }
-        }
 
-        // ページネーションを更新
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredData.length / currentDisplayCount);
-            const pagination = document.getElementById('pagination');
-            const pageInfo = document.getElementById('pageInfo');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            
-            if (totalPages <= 1) {
-                pagination.style.display = 'none';
-                return;
-            }
-            
-            pagination.style.display = 'flex';
-            pageInfo.textContent = `${currentPage} / ${totalPages}`;
-            
-            prevBtn.classList.toggle('disabled', currentPage === 1);
-            nextBtn.classList.toggle('disabled', currentPage === totalPages);
-        }
+          <div class="row" title="Flämän">
+            <div class="rank">🎖️</div>
+            <div class="name">Flämän</div>
+            <div class="value">44,470,574</div>
+          </div>
 
-        // ページ変更
-        function changePage(direction) {
-            const totalPages = Math.ceil(filteredData.length / currentDisplayCount);
-            const newPage = currentPage + direction;
-            
-            if (newPage >= 1 && newPage <= totalPages) {
-                currentPage = newPage;
-                updateMembersTable();
-            }
-        }
+          </div>
+        </div>
 
-        // 表示件数変更
-        function changeDisplayCount(count) {
-            currentDisplayCount = count;
-            currentPage = 1;
+        <div class="card inner">
+          <div class="card-title">💀 Dead Diff Top 5</div>
+          <div class="rows">
             
-            // ボタンのアクティブ状態を更新
-            document.querySelectorAll('.display-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (parseInt(btn.dataset.count) === count) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            updateMembersTable();
-        }
+          <div class="row" title="ᴶᴺ オビ・ワン">
+            <div class="rank">🥇</div>
+            <div class="name">ᴶᴺ オビ・ワン</div>
+            <div class="value">7,313,380</div>
+          </div>
 
-        // 検索機能
-        function searchPlayers() {
-            const input = document.getElementById('searchInput');
-            searchTerm = input.value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                filteredData = allMembersData;
-            } else {
-                filteredData = allMembersData.filter(player => 
-                    player.name.toLowerCase().includes(searchTerm)
-                );
-            }
-            
-            currentPage = 1;
-            updateMembersTable();
-        }
 
-        // 検索クリア
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            searchTerm = '';
-            filteredData = allMembersData;
-            currentPage = 1;
-            updateMembersTable();
-        }
+          <div class="row" title="ᴰᴮˢ ジェダイ">
+            <div class="rank">🥈</div>
+            <div class="name">ᴰᴮˢ ジェダイ</div>
+            <div class="value">6,052,894</div>
+          </div>
 
-        // ページ読み込み時の初期化
-        document.addEventListener('DOMContentLoaded', function() {
-            // グラフとリストを作成
-            createDKPChart();
-            createRankingList('t5KillsList', t5KillsData);
-            createRankingList('deadList', deadData);
-            createRankingList('farmDeadList', farmDeadData);
+
+          <div class="row" title="どんまいコキチ">
+            <div class="rank">🥉</div>
+            <div class="name">どんまいコキチ</div>
+            <div class="value">4,076,382</div>
+          </div>
+
+
+          <div class="row" title="笑福亭銀丸">
+            <div class="rank">🏅</div>
+            <div class="name">笑福亭銀丸</div>
+            <div class="value">3,994,123</div>
+          </div>
+
+
+          <div class="row" title="匠栞6">
+            <div class="rank">🎖️</div>
+            <div class="name">匠栞6</div>
+            <div class="value">3,886,104</div>
+          </div>
+
+          </div>
+        </div>
+
+        <div class="card inner">
+          <div class="card-title">🌾 Farm-Account Dead Diff Top 5</div>
+          <div class="rows">
             
-            // 全メンバーテーブルを初期化
-            updateMembersTable();
-            
-            // 表示件数ボタンのイベントリスナー
-            document.querySelectorAll('.display-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const count = parseInt(btn.dataset.count);
-                    changeDisplayCount(count);
-                });
-            });
-            
-            // 検索機能のイベントリスナー
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', searchPlayers);
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    searchPlayers();
-                }
-            });
-            
-            // アニメーション効果
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-            
-            document.querySelectorAll('.animation-fade-in').forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                observer.observe(el);
-            });
-        });
-    </script>
+          <div class="row" title="勝小吉">
+            <div class="rank">🥇</div>
+            <div class="name">勝小吉</div>
+            <div class="value">10,255,861</div>
+          </div>
+
+
+          <div class="row" title="ᴰᴮˢ ジェダイ">
+            <div class="rank">🥈</div>
+            <div class="name">ᴰᴮˢ ジェダイ</div>
+            <div class="value">8,088,628</div>
+          </div>
+
+
+          <div class="row" title="すだこ">
+            <div class="rank">🥉</div>
+            <div class="name">すだこ</div>
+            <div class="value">5,204,965</div>
+          </div>
+
+
+          <div class="row" title="Flämän">
+            <div class="rank">🏅</div>
+            <div class="name">Flämän</div>
+            <div class="value">4,067,249</div>
+          </div>
+
+
+          <div class="row" title="ᴰᴮˢ匠栞5">
+            <div class="rank">🎖️</div>
+            <div class="name">ᴰᴮˢ匠栞5</div>
+            <div class="value">3,886,104</div>
+          </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TOP20 chart -->
+    <div class="card">
+      <h2 style="margin:0 0 10px;">TOP20 Updated_DKP（横棒グラフ）</h2>
+      <div class="chart-wrap">
+        <canvas id="top20Chart" height="420"></canvas>
+      </div>
+    </div>
+
+    <!-- Full ranked table -->
+    <div class="card table-wrap">
+      <h2 style="margin:0 0 10px;">全プレイヤー戦果一覧（Updated_DKPランキング順）</h2>
+      <table class="display compact cell-border stripe nowrap dkp-table" id="fullTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>ID</th>
+            <th>T4_Kill_Diff</th>
+            <th>T5_Kill_Diff</th>
+            <th>Dead_Diff</th>
+            <th>Farm_Dead_Diff</th>
+            <th>DKP</th>
+            <th>Updated_DKP</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td class="num">1</td>
+      <td>DBsわんこ先生</td>
+      <td class="num">43,663,767</td>
+      <td class="num">12,096,868</td>
+      <td class="num">64,474,320</td>
+      <td class="num">2,742,099</td>
+      <td class="num">2,478,873</td>
+      <td class="num">375,599,953</td>
+      <td class="num">394,191,500</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">2</td>
+      <td>BADRO月光</td>
+      <td class="num">43,075,276</td>
+      <td class="num">16,694,987</td>
+      <td class="num">52,126,723</td>
+      <td class="num">2,093,193</td>
+      <td class="num">1,677,571</td>
+      <td class="num">308,726,497</td>
+      <td class="num">321,308,279</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">3</td>
+      <td>AREA88</td>
+      <td class="num">77,254,893</td>
+      <td class="num">5,653,291</td>
+      <td class="num">57,920,630</td>
+      <td class="num">1,059,098</td>
+      <td class="num">1,109,836</td>
+      <td class="num">311,142,911</td>
+      <td class="num">319,466,681</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">4</td>
+      <td>Flämän</td>
+      <td class="num">94,718,300</td>
+      <td class="num">8,204,947</td>
+      <td class="num">44,470,574</td>
+      <td class="num">899,210</td>
+      <td class="num">4,067,249</td>
+      <td class="num">244,045,967</td>
+      <td class="num">274,550,334</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">5</td>
+      <td>iLTWˣ</td>
+      <td class="num">59,332,575</td>
+      <td class="num">2,718,850</td>
+      <td class="num">51,777,674</td>
+      <td class="num">139,996</td>
+      <td class="num">0</td>
+      <td class="num">263,707,160</td>
+      <td class="num">263,707,160</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">6</td>
+      <td>GREGO</td>
+      <td class="num">139,750,695</td>
+      <td class="num">5,959,510</td>
+      <td class="num">41,220,994</td>
+      <td class="num">1,496,417</td>
+      <td class="num">1,401,467</td>
+      <td class="num">234,510,735</td>
+      <td class="num">245,021,737</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">7</td>
+      <td>笑福亭銀丸</td>
+      <td class="num">45,767,387</td>
+      <td class="num">6,471,917</td>
+      <td class="num">33,759,326</td>
+      <td class="num">3,994,123</td>
+      <td class="num">196,500</td>
+      <td class="num">235,180,392</td>
+      <td class="num">236,654,142</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">8</td>
+      <td>Mụ Q Dùng</td>
+      <td class="num">139,755,811</td>
+      <td class="num">4,971,467</td>
+      <td class="num">40,677,336</td>
+      <td class="num">1,655,404</td>
+      <td class="num">0</td>
+      <td class="num">233,189,207</td>
+      <td class="num">233,189,207</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">9</td>
+      <td>ᴰᴮˢ ジェダイ</td>
+      <td class="num">60,845,037</td>
+      <td class="num">834,957</td>
+      <td class="num">10,036,866</td>
+      <td class="num">6,052,894</td>
+      <td class="num">8,088,628</td>
+      <td class="num">141,812,697</td>
+      <td class="num">202,477,407</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">10</td>
+      <td>ひよこひーろー</td>
+      <td class="num">66,594,541</td>
+      <td class="num">6,097,363</td>
+      <td class="num">35,370,587</td>
+      <td class="num">669,422</td>
+      <td class="num">757,296</td>
+      <td class="num">192,991,628</td>
+      <td class="num">198,671,348</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">11</td>
+      <td>Tesh V2</td>
+      <td class="num">88,309,996</td>
+      <td class="num">4,058,742</td>
+      <td class="num">35,334,413</td>
+      <td class="num">1,119,282</td>
+      <td class="num">0</td>
+      <td class="num">197,520,037</td>
+      <td class="num">197,520,037</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">12</td>
+      <td>乄 Senator 乄</td>
+      <td class="num">109,504,753</td>
+      <td class="num">2,305,542</td>
+      <td class="num">28,312,057</td>
+      <td class="num">1,573,454</td>
+      <td class="num">0</td>
+      <td class="num">167,467,637</td>
+      <td class="num">167,467,637</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">13</td>
+      <td>乂 Pazzito 乂</td>
+      <td class="num">66,531,746</td>
+      <td class="num">7,146,735</td>
+      <td class="num">26,922,605</td>
+      <td class="num">527,814</td>
+      <td class="num">1,515,731</td>
+      <td class="num">149,676,970</td>
+      <td class="num">161,044,952</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">14</td>
+      <td>勝小吉</td>
+      <td class="num">63,464,390</td>
+      <td class="num">3,325,546</td>
+      <td class="num">8,675,034</td>
+      <td class="num">1,925,545</td>
+      <td class="num">10,255,861</td>
+      <td class="num">75,583,891</td>
+      <td class="num">152,502,848</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">15</td>
+      <td>ᴰᴮˢmattari</td>
+      <td class="num">68,044,185</td>
+      <td class="num">2,533,671</td>
+      <td class="num">24,850,049</td>
+      <td class="num">648,568</td>
+      <td class="num">1,685,649</td>
+      <td class="num">136,512,436</td>
+      <td class="num">149,154,803</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">16</td>
+      <td>Tesh V0</td>
+      <td class="num">69,258,321</td>
+      <td class="num">8,477,953</td>
+      <td class="num">23,124,225</td>
+      <td class="num">1,630,387</td>
+      <td class="num">0</td>
+      <td class="num">148,554,883</td>
+      <td class="num">148,554,883</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">17</td>
+      <td>ーNちゃー</td>
+      <td class="num">58,200,727</td>
+      <td class="num">4,013,492</td>
+      <td class="num">21,234,118</td>
+      <td class="num">969,738</td>
+      <td class="num">2,193,048</td>
+      <td class="num">124,730,152</td>
+      <td class="num">141,178,012</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">18</td>
+      <td>Edward  NewGate</td>
+      <td class="num">53,582,467</td>
+      <td class="num">3,384,715</td>
+      <td class="num">24,011,628</td>
+      <td class="num">790,308</td>
+      <td class="num">0</td>
+      <td class="num">135,297,475</td>
+      <td class="num">135,297,475</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">19</td>
+      <td>Invictus1888</td>
+      <td class="num">60,925,629</td>
+      <td class="num">2,542,759</td>
+      <td class="num">21,821,550</td>
+      <td class="num">981,406</td>
+      <td class="num">509,442</td>
+      <td class="num">126,371,599</td>
+      <td class="num">130,192,414</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">20</td>
+      <td>初代ムーパパ</td>
+      <td class="num">43,593,096</td>
+      <td class="num">4,348,219</td>
+      <td class="num">17,900,983</td>
+      <td class="num">1,247,860</td>
+      <td class="num">1,578,646</td>
+      <td class="num">112,571,034</td>
+      <td class="num">124,410,879</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">21</td>
+      <td>ᴶᴺ オビ・ワン</td>
+      <td class="num">65,915,701</td>
+      <td class="num">102,677</td>
+      <td class="num">580,838</td>
+      <td class="num">7,313,380</td>
+      <td class="num">0</td>
+      <td class="num">112,707,567</td>
+      <td class="num">112,707,567</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">22</td>
+      <td>すだこ</td>
+      <td class="num">103,748,058</td>
+      <td class="num">1,748,106</td>
+      <td class="num">11,778,685</td>
+      <td class="num">332,108</td>
+      <td class="num">5,204,965</td>
+      <td class="num">65,623,151</td>
+      <td class="num">104,660,388</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">23</td>
+      <td>PANKO ᴘᴀ</td>
+      <td class="num">110,378,969</td>
+      <td class="num">3,319,207</td>
+      <td class="num">9,326,518</td>
+      <td class="num">2,570,637</td>
+      <td class="num">1,870,204</td>
+      <td class="num">88,511,352</td>
+      <td class="num">102,537,882</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">24</td>
+      <td>ظzaza</td>
+      <td class="num">139,697,754</td>
+      <td class="num">1,824,412</td>
+      <td class="num">14,285,485</td>
+      <td class="num">1,583,802</td>
+      <td class="num">0</td>
+      <td class="num">97,008,867</td>
+      <td class="num">97,008,867</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">25</td>
+      <td>DBsにゃんこ先生</td>
+      <td class="num">45,862,797</td>
+      <td class="num">2,770,359</td>
+      <td class="num">11,504,618</td>
+      <td class="num">2,309,119</td>
+      <td class="num">0</td>
+      <td class="num">94,930,234</td>
+      <td class="num">94,930,234</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">26</td>
+      <td>JustHopper</td>
+      <td class="num">46,394,818</td>
+      <td class="num">1,287,999</td>
+      <td class="num">11,220,381</td>
+      <td class="num">856,079</td>
+      <td class="num">2,676,553</td>
+      <td class="num">70,231,089</td>
+      <td class="num">90,305,236</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">27</td>
+      <td>KK親父KK</td>
+      <td class="num">65,451,136</td>
+      <td class="num">3,464,471</td>
+      <td class="num">13,008,270</td>
+      <td class="num">1,089,153</td>
+      <td class="num">666,912</td>
+      <td class="num">84,843,116</td>
+      <td class="num">89,844,956</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">28</td>
+      <td>ᴰᴮˢZunさん</td>
+      <td class="num">93,309,377</td>
+      <td class="num">2,380,599</td>
+      <td class="num">13,405,461</td>
+      <td class="num">796,480</td>
+      <td class="num">0</td>
+      <td class="num">81,355,104</td>
+      <td class="num">81,355,104</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">29</td>
+      <td>AhmadSn</td>
+      <td class="num">139,739,577</td>
+      <td class="num">1,690,365</td>
+      <td class="num">12,807,922</td>
+      <td class="num">332,833</td>
+      <td class="num">0</td>
+      <td class="num">70,722,470</td>
+      <td class="num">70,722,470</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">30</td>
+      <td>どんまいコキチ</td>
+      <td class="num">86,320,809</td>
+      <td class="num">1,030,782</td>
+      <td class="num">1,573,784</td>
+      <td class="num">4,076,382</td>
+      <td class="num">0</td>
+      <td class="num">70,045,432</td>
+      <td class="num">70,045,432</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">31</td>
+      <td>猫猫乄りむるん</td>
+      <td class="num">68,380,154</td>
+      <td class="num">1,669,592</td>
+      <td class="num">11,312,333</td>
+      <td class="num">688,166</td>
+      <td class="num">0</td>
+      <td class="num">68,553,747</td>
+      <td class="num">68,553,747</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">32</td>
+      <td>ᴰᴮᶳﾗﾝﾗﾝ</td>
+      <td class="num">68,132,383</td>
+      <td class="num">1,053,260</td>
+      <td class="num">7,337,358</td>
+      <td class="num">1,150,453</td>
+      <td class="num">1,775,410</td>
+      <td class="num">54,996,845</td>
+      <td class="num">68,312,420</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">33</td>
+      <td>ᴰᴮˢアオクマ</td>
+      <td class="num">43,709,339</td>
+      <td class="num">1,302,851</td>
+      <td class="num">11,155,758</td>
+      <td class="num">372,519</td>
+      <td class="num">618,927</td>
+      <td class="num">62,669,426</td>
+      <td class="num">67,311,378</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">34</td>
+      <td>Haruki 6</td>
+      <td class="num">70,440,309</td>
+      <td class="num">2,115,906</td>
+      <td class="num">7,887,553</td>
+      <td class="num">1,637,966</td>
+      <td class="num">0</td>
+      <td class="num">66,123,161</td>
+      <td class="num">66,123,161</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">35</td>
+      <td>B u Z Z e r</td>
+      <td class="num">144,854,097</td>
+      <td class="num">7,795,254</td>
+      <td class="num">7,657,372</td>
+      <td class="num">973,915</td>
+      <td class="num">0</td>
+      <td class="num">60,690,839</td>
+      <td class="num">60,690,839</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">36</td>
+      <td>black foot S</td>
+      <td class="num">61,162,793</td>
+      <td class="num">1,514,895</td>
+      <td class="num">10,775,974</td>
+      <td class="num">331,769</td>
+      <td class="num">9,262</td>
+      <td class="num">60,371,300</td>
+      <td class="num">60,440,765</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">37</td>
+      <td>匠栞6</td>
+      <td class="num">148,046,195</td>
+      <td class="num">0</td>
+      <td class="num">191,149</td>
+      <td class="num">3,886,104</td>
+      <td class="num">0</td>
+      <td class="num">59,247,305</td>
+      <td class="num">59,247,305</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">38</td>
+      <td>ᴰᴮsみすたーKJ</td>
+      <td class="num">64,529,276</td>
+      <td class="num">1,777,451</td>
+      <td class="num">8,592,058</td>
+      <td class="num">778,736</td>
+      <td class="num">339,046</td>
+      <td class="num">56,418,781</td>
+      <td class="num">58,961,626</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">39</td>
+      <td>魁ゆきJapan魁</td>
+      <td class="num">68,003,723</td>
+      <td class="num">2,073,574</td>
+      <td class="num">4,541,931</td>
+      <td class="num">2,156,721</td>
+      <td class="num">232,692</td>
+      <td class="num">57,134,044</td>
+      <td class="num">58,879,234</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">40</td>
+      <td>ᴰᴮˢ khang</td>
+      <td class="num">139,143,620</td>
+      <td class="num">1,636,765</td>
+      <td class="num">3,533,532</td>
+      <td class="num">1,931,719</td>
+      <td class="num">1,337,715</td>
+      <td class="num">48,280,210</td>
+      <td class="num">58,313,072</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">41</td>
+      <td>たいぞう</td>
+      <td class="num">43,675,640</td>
+      <td class="num">1,091,348</td>
+      <td class="num">7,664,323</td>
+      <td class="num">697,187</td>
+      <td class="num">1,125,391</td>
+      <td class="num">49,870,768</td>
+      <td class="num">58,311,200</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">42</td>
+      <td>亗pote sara亗</td>
+      <td class="num">113,037,440</td>
+      <td class="num">1,677,650</td>
+      <td class="num">6,377,643</td>
+      <td class="num">873,170</td>
+      <td class="num">1,085,770</td>
+      <td class="num">46,663,415</td>
+      <td class="num">54,806,690</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">43</td>
+      <td>Tesh V1</td>
+      <td class="num">23,829,898</td>
+      <td class="num">983,981</td>
+      <td class="num">4,403,716</td>
+      <td class="num">198,544</td>
+      <td class="num">3,810,531</td>
+      <td class="num">25,980,721</td>
+      <td class="num">54,559,703</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">44</td>
+      <td>ᴳᴰ kinari</td>
+      <td class="num">70,540,811</td>
+      <td class="num">968,522</td>
+      <td class="num">5,827,396</td>
+      <td class="num">853,569</td>
+      <td class="num">1,438,384</td>
+      <td class="num">42,909,037</td>
+      <td class="num">53,696,917</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">45</td>
+      <td>DBSねね</td>
+      <td class="num">44,207,980</td>
+      <td class="num">961,299</td>
+      <td class="num">6,755,113</td>
+      <td class="num">789,271</td>
+      <td class="num">740,283</td>
+      <td class="num">46,575,929</td>
+      <td class="num">52,128,051</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">46</td>
+      <td>ᴾᴴGodLuvzÜ</td>
+      <td class="num">136,307,950</td>
+      <td class="num">1,996,535</td>
+      <td class="num">4,533,691</td>
+      <td class="num">1,708,602</td>
+      <td class="num">0</td>
+      <td class="num">50,294,020</td>
+      <td class="num">50,294,020</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">47</td>
+      <td>しんなり</td>
+      <td class="num">50,262,455</td>
+      <td class="num">1,202,769</td>
+      <td class="num">4,550,671</td>
+      <td class="num">1,704,317</td>
+      <td class="num">0</td>
+      <td class="num">49,520,879</td>
+      <td class="num">49,520,879</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">48</td>
+      <td>ᴰᴮᶳじん太</td>
+      <td class="num">61,773,105</td>
+      <td class="num">1,686,496</td>
+      <td class="num">6,524,841</td>
+      <td class="num">537,026</td>
+      <td class="num">750,112</td>
+      <td class="num">42,366,091</td>
+      <td class="num">47,991,931</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">49</td>
+      <td>LーELF</td>
+      <td class="num">169,303,654</td>
+      <td class="num">2,009,890</td>
+      <td class="num">5,005,326</td>
+      <td class="num">1,366,202</td>
+      <td class="num">0</td>
+      <td class="num">47,529,550</td>
+      <td class="num">47,529,550</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">50</td>
+      <td>capitangoon</td>
+      <td class="num">67,031,621</td>
+      <td class="num">1,663,720</td>
+      <td class="num">4,552,937</td>
+      <td class="num">1,221,476</td>
+      <td class="num">0</td>
+      <td class="num">42,750,545</td>
+      <td class="num">42,750,545</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">51</td>
+      <td>お菊のさら</td>
+      <td class="num">58,707,725</td>
+      <td class="num">1,635,879</td>
+      <td class="num">5,825,611</td>
+      <td class="num">742,490</td>
+      <td class="num">12,900</td>
+      <td class="num">41,901,284</td>
+      <td class="num">41,998,034</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">52</td>
+      <td>ᴰᴮˢ匠栞5</td>
+      <td class="num">139,148,263</td>
+      <td class="num">248,755</td>
+      <td class="num">928,784</td>
+      <td class="num">308,104</td>
+      <td class="num">3,886,104</td>
+      <td class="num">9,514,235</td>
+      <td class="num">38,660,015</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">53</td>
+      <td>ᴷˣLEGACY</td>
+      <td class="num">60,927,185</td>
+      <td class="num">949,633</td>
+      <td class="num">4,284,105</td>
+      <td class="num">712,959</td>
+      <td class="num">498,219</td>
+      <td class="num">33,064,543</td>
+      <td class="num">36,801,185</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">54</td>
+      <td>PAMU pi</td>
+      <td class="num">146,950,687</td>
+      <td class="num">3,288,254</td>
+      <td class="num">3,745,494</td>
+      <td class="num">894,034</td>
+      <td class="num">0</td>
+      <td class="num">35,426,234</td>
+      <td class="num">35,426,234</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">55</td>
+      <td>kokichi miller</td>
+      <td class="num">80,131,476</td>
+      <td class="num">1,254,928</td>
+      <td class="num">1,748,584</td>
+      <td class="num">1,551,381</td>
+      <td class="num">0</td>
+      <td class="num">33,268,563</td>
+      <td class="num">33,268,563</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">56</td>
+      <td>べいびーでびる</td>
+      <td class="num">61,815,957</td>
+      <td class="num">1,084,035</td>
+      <td class="num">2,855,944</td>
+      <td class="num">1,159,170</td>
+      <td class="num">8,865</td>
+      <td class="num">32,751,305</td>
+      <td class="num">32,817,792</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">57</td>
+      <td>コロスケナリ</td>
+      <td class="num">68,011,392</td>
+      <td class="num">1,043,871</td>
+      <td class="num">2,146,369</td>
+      <td class="num">1,391,903</td>
+      <td class="num">0</td>
+      <td class="num">32,654,261</td>
+      <td class="num">32,654,261</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">58</td>
+      <td>Muhammad 亗</td>
+      <td class="num">109,576,124</td>
+      <td class="num">577,302</td>
+      <td class="num">921,514</td>
+      <td class="num">972,415</td>
+      <td class="num">1,679,381</td>
+      <td class="num">19,771,097</td>
+      <td class="num">32,366,454</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">59</td>
+      <td>あさみᴘᴀ</td>
+      <td class="num">89,297,222</td>
+      <td class="num">775,318</td>
+      <td class="num">4,826,992</td>
+      <td class="num">490,517</td>
+      <td class="num">0</td>
+      <td class="num">32,268,033</td>
+      <td class="num">32,268,033</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">60</td>
+      <td>勝新太郎</td>
+      <td class="num">133,548,568</td>
+      <td class="num">1,014,485</td>
+      <td class="num">1,012,237</td>
+      <td class="num">1,712,221</td>
+      <td class="num">0</td>
+      <td class="num">31,758,985</td>
+      <td class="num">31,758,985</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">61</td>
+      <td>ʚちゃんコキチちゃんɞ</td>
+      <td class="num">65,059,752</td>
+      <td class="num">1,388,810</td>
+      <td class="num">1,859,777</td>
+      <td class="num">1,402,312</td>
+      <td class="num">0</td>
+      <td class="num">31,722,375</td>
+      <td class="num">31,722,375</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">62</td>
+      <td>small Badro</td>
+      <td class="num">151,138,843</td>
+      <td class="num">575,264</td>
+      <td class="num">1,450,948</td>
+      <td class="num">1,519,316</td>
+      <td class="num">0</td>
+      <td class="num">30,619,744</td>
+      <td class="num">30,619,744</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">63</td>
+      <td>Gsub1</td>
+      <td class="num">141,289,745</td>
+      <td class="num">930,252</td>
+      <td class="num">1,680,585</td>
+      <td class="num">1,384,594</td>
+      <td class="num">0</td>
+      <td class="num">30,102,087</td>
+      <td class="num">30,102,087</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">64</td>
+      <td>PANKO2号ᴘᴀ</td>
+      <td class="num">121,387,743</td>
+      <td class="num">1,249,069</td>
+      <td class="num">1,848,836</td>
+      <td class="num">1,276,997</td>
+      <td class="num">0</td>
+      <td class="num">29,648,204</td>
+      <td class="num">29,648,204</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">65</td>
+      <td>Lan kokichi</td>
+      <td class="num">81,960,359</td>
+      <td class="num">982,632</td>
+      <td class="num">1,029,437</td>
+      <td class="num">1,513,565</td>
+      <td class="num">0</td>
+      <td class="num">28,833,292</td>
+      <td class="num">28,833,292</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">66</td>
+      <td>ᴰᴮˢnull</td>
+      <td class="num">169,265,290</td>
+      <td class="num">949,727</td>
+      <td class="num">3,148,516</td>
+      <td class="num">736,332</td>
+      <td class="num">0</td>
+      <td class="num">27,737,287</td>
+      <td class="num">27,737,287</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">67</td>
+      <td>Flämän牧場</td>
+      <td class="num">108,153,377</td>
+      <td class="num">772,400</td>
+      <td class="num">1,556,307</td>
+      <td class="num">1,212,209</td>
+      <td class="num">0</td>
+      <td class="num">26,737,070</td>
+      <td class="num">26,737,070</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">68</td>
+      <td>まだこ</td>
+      <td class="num">123,810,128</td>
+      <td class="num">340,535</td>
+      <td class="num">788,424</td>
+      <td class="num">1,488,436</td>
+      <td class="num">0</td>
+      <td class="num">26,609,195</td>
+      <td class="num">26,609,195</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">69</td>
+      <td>ᴰᴮˢRanran</td>
+      <td class="num">102,497,955</td>
+      <td class="num">553,696</td>
+      <td class="num">832,456</td>
+      <td class="num">1,426,427</td>
+      <td class="num">0</td>
+      <td class="num">26,112,381</td>
+      <td class="num">26,112,381</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">70</td>
+      <td>たけたか</td>
+      <td class="num">51,756,042</td>
+      <td class="num">116,409</td>
+      <td class="num">1,330,112</td>
+      <td class="num">1,236,815</td>
+      <td class="num">0</td>
+      <td class="num">25,319,194</td>
+      <td class="num">25,319,194</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">71</td>
+      <td>khang 62</td>
+      <td class="num">142,341,891</td>
+      <td class="num">891,453</td>
+      <td class="num">817,685</td>
+      <td class="num">1,337,715</td>
+      <td class="num">0</td>
+      <td class="num">25,045,603</td>
+      <td class="num">25,045,603</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">72</td>
+      <td>亗ぽてぽて亗</td>
+      <td class="num">118,986,461</td>
+      <td class="num">1,286,614</td>
+      <td class="num">1,146,491</td>
+      <td class="num">1,085,770</td>
+      <td class="num">0</td>
+      <td class="num">23,305,619</td>
+      <td class="num">23,305,619</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">73</td>
+      <td>ChosHopper</td>
+      <td class="num">68,037,525</td>
+      <td class="num">919,628</td>
+      <td class="num">958,910</td>
+      <td class="num">1,047,942</td>
+      <td class="num">0</td>
+      <td class="num">21,433,308</td>
+      <td class="num">21,433,308</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">74</td>
+      <td>Flämänboy</td>
+      <td class="num">120,970,200</td>
+      <td class="num">565,037</td>
+      <td class="num">1,042,407</td>
+      <td class="num">954,402</td>
+      <td class="num">0</td>
+      <td class="num">20,093,102</td>
+      <td class="num">20,093,102</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">75</td>
+      <td>ﾄﾓﾓﾓﾓﾝ</td>
+      <td class="num">48,684,677</td>
+      <td class="num">565,635</td>
+      <td class="num">2,035,236</td>
+      <td class="num">609,144</td>
+      <td class="num">0</td>
+      <td class="num">19,878,975</td>
+      <td class="num">19,878,975</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">76</td>
+      <td>まったり覆面マン</td>
+      <td class="num">146,351,288</td>
+      <td class="num">970,454</td>
+      <td class="num">888,328</td>
+      <td class="num">946,502</td>
+      <td class="num">0</td>
+      <td class="num">19,609,624</td>
+      <td class="num">19,609,624</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">77</td>
+      <td>kinӓЯi</td>
+      <td class="num">65,918,526</td>
+      <td class="num">288,837</td>
+      <td class="num">522,496</td>
+      <td class="num">1,043,211</td>
+      <td class="num">0</td>
+      <td class="num">18,549,482</td>
+      <td class="num">18,549,482</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">78</td>
+      <td>ムーパパジュニア</td>
+      <td class="num">61,227,294</td>
+      <td class="num">478,771</td>
+      <td class="num">526,853</td>
+      <td class="num">969,502</td>
+      <td class="num">0</td>
+      <td class="num">17,655,566</td>
+      <td class="num">17,655,566</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">79</td>
+      <td>Haruki 77</td>
+      <td class="num">88,166,606</td>
+      <td class="num">1,237,408</td>
+      <td class="num">1,001,216</td>
+      <td class="num">709,753</td>
+      <td class="num">0</td>
+      <td class="num">16,889,783</td>
+      <td class="num">16,889,783</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">80</td>
+      <td>Muhammad ツ</td>
+      <td class="num">108,836,151</td>
+      <td class="num">626,677</td>
+      <td class="num">509,294</td>
+      <td class="num">897,788</td>
+      <td class="num">0</td>
+      <td class="num">16,639,967</td>
+      <td class="num">16,639,967</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">81</td>
+      <td>あげだこ</td>
+      <td class="num">149,526,784</td>
+      <td class="num">135,170</td>
+      <td class="num">291,696</td>
+      <td class="num">1,001,763</td>
+      <td class="num">0</td>
+      <td class="num">16,620,095</td>
+      <td class="num">16,620,095</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">82</td>
+      <td>ᴮᴬᴰ Pazz</td>
+      <td class="num">74,211,038</td>
+      <td class="num">664,841</td>
+      <td class="num">803,539</td>
+      <td class="num">795,458</td>
+      <td class="num">0</td>
+      <td class="num">16,614,406</td>
+      <td class="num">16,614,406</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">83</td>
+      <td>BADRO fm</td>
+      <td class="num">153,189,835</td>
+      <td class="num">382,363</td>
+      <td class="num">612,375</td>
+      <td class="num">873,995</td>
+      <td class="num">0</td>
+      <td class="num">16,554,163</td>
+      <td class="num">16,554,163</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">84</td>
+      <td>Tesh 02</td>
+      <td class="num">54,178,468</td>
+      <td class="num">91,901</td>
+      <td class="num">176,310</td>
+      <td class="num">1,035,343</td>
+      <td class="num">0</td>
+      <td class="num">16,503,596</td>
+      <td class="num">16,503,596</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">85</td>
+      <td>Flämän水産</td>
+      <td class="num">129,543,797</td>
+      <td class="num">292,574</td>
+      <td class="num">386,769</td>
+      <td class="num">930,674</td>
+      <td class="num">0</td>
+      <td class="num">16,186,529</td>
+      <td class="num">16,186,529</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">86</td>
+      <td>アヒルヒーロー</td>
+      <td class="num">89,546,114</td>
+      <td class="num">629,452</td>
+      <td class="num">1,053,486</td>
+      <td class="num">665,737</td>
+      <td class="num">0</td>
+      <td class="num">15,882,937</td>
+      <td class="num">15,882,937</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">87</td>
+      <td>Pazz UK</td>
+      <td class="num">96,696,068</td>
+      <td class="num">533,733</td>
+      <td class="num">515,207</td>
+      <td class="num">787,021</td>
+      <td class="num">0</td>
+      <td class="num">14,915,083</td>
+      <td class="num">14,915,083</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">88</td>
+      <td>Muhammad KG 亗</td>
+      <td class="num">108,532,959</td>
+      <td class="num">522,056</td>
+      <td class="num">530,937</td>
+      <td class="num">781,593</td>
+      <td class="num">0</td>
+      <td class="num">14,900,636</td>
+      <td class="num">14,900,636</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">89</td>
+      <td>噂のいしぐん</td>
+      <td class="num">46,123,891</td>
+      <td class="num">519,779</td>
+      <td class="num">1,992,094</td>
+      <td class="num">284,000</td>
+      <td class="num">0</td>
+      <td class="num">14,740,249</td>
+      <td class="num">14,740,249</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">90</td>
+      <td>NちゃI1ー</td>
+      <td class="num">58,435,296</td>
+      <td class="num">655,006</td>
+      <td class="num">999,986</td>
+      <td class="num">601,738</td>
+      <td class="num">0</td>
+      <td class="num">14,681,006</td>
+      <td class="num">14,681,006</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">91</td>
+      <td>やきだこ</td>
+      <td class="num">121,226,145</td>
+      <td class="num">243,802</td>
+      <td class="num">480,581</td>
+      <td class="num">800,968</td>
+      <td class="num">0</td>
+      <td class="num">14,661,227</td>
+      <td class="num">14,661,227</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">92</td>
+      <td>エリアS</td>
+      <td class="num">92,241,169</td>
+      <td class="num">381,263</td>
+      <td class="num">854,048</td>
+      <td class="num">649,437</td>
+      <td class="num">0</td>
+      <td class="num">14,393,058</td>
+      <td class="num">14,393,058</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">93</td>
+      <td>Pisotin ka</td>
+      <td class="num">139,796,188</td>
+      <td class="num">351,746</td>
+      <td class="num">898,680</td>
+      <td class="num">616,096</td>
+      <td class="num">0</td>
+      <td class="num">14,086,586</td>
+      <td class="num">14,086,586</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">94</td>
+      <td>badro farm 2</td>
+      <td class="num">169,927,719</td>
+      <td class="num">373,029</td>
+      <td class="num">282,761</td>
+      <td class="num">803,576</td>
+      <td class="num">0</td>
+      <td class="num">13,840,474</td>
+      <td class="num">13,840,474</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">95</td>
+      <td>PANKO 3号</td>
+      <td class="num">175,755,953</td>
+      <td class="num">704,653</td>
+      <td class="num">816,544</td>
+      <td class="num">593,207</td>
+      <td class="num">0</td>
+      <td class="num">13,685,478</td>
+      <td class="num">13,685,478</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">96</td>
+      <td>まったり貯金箱</td>
+      <td class="num">70,601,625</td>
+      <td class="num">664,880</td>
+      <td class="num">857,818</td>
+      <td class="num">579,235</td>
+      <td class="num">0</td>
+      <td class="num">13,642,495</td>
+      <td class="num">13,642,495</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">97</td>
+      <td>KKさぶKK</td>
+      <td class="num">82,265,010</td>
+      <td class="num">332,544</td>
+      <td class="num">645,330</td>
+      <td class="num">666,912</td>
+      <td class="num">0</td>
+      <td class="num">13,562,874</td>
+      <td class="num">13,562,874</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">98</td>
+      <td>hoppermini</td>
+      <td class="num">50,620,474</td>
+      <td class="num">0</td>
+      <td class="num">42,099</td>
+      <td class="num">878,741</td>
+      <td class="num">0</td>
+      <td class="num">13,391,610</td>
+      <td class="num">13,391,610</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">99</td>
+      <td>ねねsub</td>
+      <td class="num">50,159,798</td>
+      <td class="num">276,408</td>
+      <td class="num">278,605</td>
+      <td class="num">708,903</td>
+      <td class="num">0</td>
+      <td class="num">12,302,978</td>
+      <td class="num">12,302,978</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">100</td>
+      <td>ᴶᴺ ヨーダ</td>
+      <td class="num">85,628,951</td>
+      <td class="num">0</td>
+      <td class="num">7,784</td>
+      <td class="num">775,248</td>
+      <td class="num">0</td>
+      <td class="num">11,667,640</td>
+      <td class="num">11,667,640</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">101</td>
+      <td>Invictus Farmer</td>
+      <td class="num">176,775,566</td>
+      <td class="num">287,190</td>
+      <td class="num">723,088</td>
+      <td class="num">509,442</td>
+      <td class="num">0</td>
+      <td class="num">11,544,260</td>
+      <td class="num">11,544,260</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">102</td>
+      <td>Mustafa KG</td>
+      <td class="num">8,387,407</td>
+      <td class="num">636,290</td>
+      <td class="num">1,898,729</td>
+      <td class="num">92,121</td>
+      <td class="num">0</td>
+      <td class="num">11,511,750</td>
+      <td class="num">11,511,750</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">103</td>
+      <td>ᴶᴺすだこ</td>
+      <td class="num">157,867,399</td>
+      <td class="num">331,762</td>
+      <td class="num">332,115</td>
+      <td class="num">627,230</td>
+      <td class="num">0</td>
+      <td class="num">11,400,787</td>
+      <td class="num">11,400,787</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">104</td>
+      <td>たいぞう サブサブ</td>
+      <td class="num">105,664,770</td>
+      <td class="num">486,462</td>
+      <td class="num">507,183</td>
+      <td class="num">542,521</td>
+      <td class="num">0</td>
+      <td class="num">11,160,192</td>
+      <td class="num">11,160,192</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">105</td>
+      <td>ゾンビーJK2</td>
+      <td class="num">70,591,833</td>
+      <td class="num">477,126</td>
+      <td class="num">1,102,852</td>
+      <td class="num">339,046</td>
+      <td class="num">0</td>
+      <td class="num">11,077,076</td>
+      <td class="num">11,077,076</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">106</td>
+      <td>たいぞう サブ</td>
+      <td class="num">58,428,520</td>
+      <td class="num">495,438</td>
+      <td class="num">358,026</td>
+      <td class="num">582,870</td>
+      <td class="num">0</td>
+      <td class="num">11,028,618</td>
+      <td class="num">11,028,618</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">107</td>
+      <td>レガシー忍者</td>
+      <td class="num">65,051,393</td>
+      <td class="num">523,709</td>
+      <td class="num">1,190,309</td>
+      <td class="num">260,377</td>
+      <td class="num">0</td>
+      <td class="num">10,380,909</td>
+      <td class="num">10,380,909</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">108</td>
+      <td>ᴰᴮˢZun</td>
+      <td class="num">72,862,962</td>
+      <td class="num">537,389</td>
+      <td class="num">902,376</td>
+      <td class="num">349,512</td>
+      <td class="num">0</td>
+      <td class="num">10,291,949</td>
+      <td class="num">10,291,949</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">109</td>
+      <td>Pamu f5</td>
+      <td class="num">139,030,853</td>
+      <td class="num">9,973</td>
+      <td class="num">53,450</td>
+      <td class="num">644,736</td>
+      <td class="num">0</td>
+      <td class="num">9,948,263</td>
+      <td class="num">9,948,263</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">110</td>
+      <td>じん太2</td>
+      <td class="num">91,688,459</td>
+      <td class="num">425,346</td>
+      <td class="num">621,713</td>
+      <td class="num">420,403</td>
+      <td class="num">0</td>
+      <td class="num">9,839,956</td>
+      <td class="num">9,839,956</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">111</td>
+      <td>Flämänめん</td>
+      <td class="num">164,921,435</td>
+      <td class="num">140,200</td>
+      <td class="num">262,203</td>
+      <td class="num">544,950</td>
+      <td class="num">0</td>
+      <td class="num">9,625,465</td>
+      <td class="num">9,625,465</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">112</td>
+      <td>Pen太3</td>
+      <td class="num">134,357,090</td>
+      <td class="num">379,445</td>
+      <td class="num">838,531</td>
+      <td class="num">329,709</td>
+      <td class="num">0</td>
+      <td class="num">9,517,735</td>
+      <td class="num">9,517,735</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">113</td>
+      <td>FARM SIRAhmadSn</td>
+      <td class="num">144,773,643</td>
+      <td class="num">156,817</td>
+      <td class="num">377,961</td>
+      <td class="num">454,039</td>
+      <td class="num">0</td>
+      <td class="num">8,857,207</td>
+      <td class="num">8,857,207</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">114</td>
+      <td>srシPazzito</td>
+      <td class="num">70,119,394</td>
+      <td class="num">188,005</td>
+      <td class="num">214,749</td>
+      <td class="num">489,968</td>
+      <td class="num">0</td>
+      <td class="num">8,611,270</td>
+      <td class="num">8,611,270</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">115</td>
+      <td>いいだこ</td>
+      <td class="num">121,220,386</td>
+      <td class="num">300,917</td>
+      <td class="num">475,469</td>
+      <td class="num">389,738</td>
+      <td class="num">0</td>
+      <td class="num">8,524,332</td>
+      <td class="num">8,524,332</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">116</td>
+      <td>Hopperchan</td>
+      <td class="num">57,248,791</td>
+      <td class="num">352,871</td>
+      <td class="num">281,806</td>
+      <td class="num">428,367</td>
+      <td class="num">0</td>
+      <td class="num">8,187,406</td>
+      <td class="num">8,187,406</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">117</td>
+      <td>ヒデ1</td>
+      <td class="num">90,170,627</td>
+      <td class="num">363,047</td>
+      <td class="num">638,393</td>
+      <td class="num">301,063</td>
+      <td class="num">0</td>
+      <td class="num">8,070,957</td>
+      <td class="num">8,070,957</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">118</td>
+      <td>笑福亭サブ</td>
+      <td class="num">47,954,953</td>
+      <td class="num">343,440</td>
+      <td class="num">860,074</td>
+      <td class="num">196,500</td>
+      <td class="num">0</td>
+      <td class="num">7,591,310</td>
+      <td class="num">7,591,310</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">119</td>
+      <td>Bank of AREA</td>
+      <td class="num">109,949,220</td>
+      <td class="num">236,236</td>
+      <td class="num">264,660</td>
+      <td class="num">401,258</td>
+      <td class="num">0</td>
+      <td class="num">7,578,406</td>
+      <td class="num">7,578,406</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">120</td>
+      <td>NちゃII1ー</td>
+      <td class="num">44,095,745</td>
+      <td class="num">808,854</td>
+      <td class="num">302,187</td>
+      <td class="num">340,603</td>
+      <td class="num">0</td>
+      <td class="num">7,428,834</td>
+      <td class="num">7,428,834</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">121</td>
+      <td>Asami3</td>
+      <td class="num">136,660,523</td>
+      <td class="num">288,546</td>
+      <td class="num">633,002</td>
+      <td class="num">251,779</td>
+      <td class="num">0</td>
+      <td class="num">7,230,241</td>
+      <td class="num">7,230,241</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">122</td>
+      <td>2940 Sudako</td>
+      <td class="num">106,080,011</td>
+      <td class="num">306,055</td>
+      <td class="num">589,831</td>
+      <td class="num">246,039</td>
+      <td class="num">0</td>
+      <td class="num">6,945,795</td>
+      <td class="num">6,945,795</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">123</td>
+      <td>ᵖʸᵖᵈすだこ</td>
+      <td class="num">157,204,087</td>
+      <td class="num">224,907</td>
+      <td class="num">236,527</td>
+      <td class="num">356,751</td>
+      <td class="num">0</td>
+      <td class="num">6,758,807</td>
+      <td class="num">6,758,807</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">124</td>
+      <td>kinӓЯiѽ</td>
+      <td class="num">79,730,295</td>
+      <td class="num">222,551</td>
+      <td class="num">142,220</td>
+      <td class="num">381,265</td>
+      <td class="num">0</td>
+      <td class="num">6,652,626</td>
+      <td class="num">6,652,626</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">125</td>
+      <td>ᴾʸRanřaň</td>
+      <td class="num">104,495,800</td>
+      <td class="num">308,823</td>
+      <td class="num">220,368</td>
+      <td class="num">348,983</td>
+      <td class="num">0</td>
+      <td class="num">6,645,408</td>
+      <td class="num">6,645,408</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">126</td>
+      <td>Flämän畑</td>
+      <td class="num">97,648,070</td>
+      <td class="num">334,768</td>
+      <td class="num">496,588</td>
+      <td class="num">253,804</td>
+      <td class="num">0</td>
+      <td class="num">6,624,768</td>
+      <td class="num">6,624,768</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">127</td>
+      <td>NちゃII2ー</td>
+      <td class="num">64,351,820</td>
+      <td class="num">365,420</td>
+      <td class="num">275,611</td>
+      <td class="num">315,338</td>
+      <td class="num">0</td>
+      <td class="num">6,473,545</td>
+      <td class="num">6,473,545</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">128</td>
+      <td>アオクマAoo</td>
+      <td class="num">62,488,149</td>
+      <td class="num">339,724</td>
+      <td class="num">327,858</td>
+      <td class="num">287,737</td>
+      <td class="num">0</td>
+      <td class="num">6,295,069</td>
+      <td class="num">6,295,069</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">129</td>
+      <td>みずだこ</td>
+      <td class="num">149,335,650</td>
+      <td class="num">267,254</td>
+      <td class="num">314,764</td>
+      <td class="num">294,040</td>
+      <td class="num">0</td>
+      <td class="num">6,251,674</td>
+      <td class="num">6,251,674</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">130</td>
+      <td>NちゃIII1ー</td>
+      <td class="num">60,459,260</td>
+      <td class="num">160,589</td>
+      <td class="num">130,777</td>
+      <td class="num">361,408</td>
+      <td class="num">0</td>
+      <td class="num">6,235,594</td>
+      <td class="num">6,235,594</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">131</td>
+      <td>NちゃIII2ー</td>
+      <td class="num">90,002,485</td>
+      <td class="num">12,289</td>
+      <td class="num">7,670</td>
+      <td class="num">391,300</td>
+      <td class="num">0</td>
+      <td class="num">5,920,139</td>
+      <td class="num">5,920,139</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">132</td>
+      <td>れがサムライ</td>
+      <td class="num">88,677,284</td>
+      <td class="num">192,910</td>
+      <td class="num">387,351</td>
+      <td class="num">237,842</td>
+      <td class="num">0</td>
+      <td class="num">5,697,295</td>
+      <td class="num">5,697,295</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">133</td>
+      <td>アオクマサブ</td>
+      <td class="num">67,431,232</td>
+      <td class="num">231,995</td>
+      <td class="num">150,016</td>
+      <td class="num">309,067</td>
+      <td class="num">0</td>
+      <td class="num">5,618,080</td>
+      <td class="num">5,618,080</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">134</td>
+      <td>もんちゃん</td>
+      <td class="num">75,515,905</td>
+      <td class="num">323,232</td>
+      <td class="num">391,456</td>
+      <td class="num">219,423</td>
+      <td class="num">0</td>
+      <td class="num">5,571,857</td>
+      <td class="num">5,571,857</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">135</td>
+      <td>雪だるマルマル</td>
+      <td class="num">105,172,511</td>
+      <td class="num">207,643</td>
+      <td class="num">307,171</td>
+      <td class="num">232,692</td>
+      <td class="num">0</td>
+      <td class="num">5,233,878</td>
+      <td class="num">5,233,878</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">136</td>
+      <td>Hopper Jr</td>
+      <td class="num">75,447,843</td>
+      <td class="num">205,588</td>
+      <td class="num">228,604</td>
+      <td class="num">248,078</td>
+      <td class="num">0</td>
+      <td class="num">5,069,778</td>
+      <td class="num">5,069,778</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">137</td>
+      <td>ᴹᴳPazz</td>
+      <td class="num">96,044,613</td>
+      <td class="num">102,300</td>
+      <td class="num">100,124</td>
+      <td class="num">230,305</td>
+      <td class="num">0</td>
+      <td class="num">4,057,495</td>
+      <td class="num">4,057,495</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">138</td>
+      <td>民主的珍珍</td>
+      <td class="num">91,650,559</td>
+      <td class="num">451,507</td>
+      <td class="num">523,845</td>
+      <td class="num">31,433</td>
+      <td class="num">0</td>
+      <td class="num">3,542,227</td>
+      <td class="num">3,542,227</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">139</td>
+      <td>わんこ先生Sub1</td>
+      <td class="num">76,391,222</td>
+      <td class="num">161,931</td>
+      <td class="num">153,444</td>
+      <td class="num">169,754</td>
+      <td class="num">0</td>
+      <td class="num">3,475,461</td>
+      <td class="num">3,475,461</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">140</td>
+      <td>バフ要員</td>
+      <td class="num">62,462,665</td>
+      <td class="num">1,974,714</td>
+      <td class="num">8,727</td>
+      <td class="num">91,559</td>
+      <td class="num">0</td>
+      <td class="num">3,391,734</td>
+      <td class="num">3,391,734</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">141</td>
+      <td>Aloosh1994</td>
+      <td class="num">139,706,341</td>
+      <td class="num">55,195</td>
+      <td class="num">3,788</td>
+      <td class="num">220,920</td>
+      <td class="num">0</td>
+      <td class="num">3,387,935</td>
+      <td class="num">3,387,935</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">142</td>
+      <td>Flämänまん</td>
+      <td class="num">159,109,763</td>
+      <td class="num">162,696</td>
+      <td class="num">114,952</td>
+      <td class="num">171,210</td>
+      <td class="num">0</td>
+      <td class="num">3,305,606</td>
+      <td class="num">3,305,606</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">143</td>
+      <td>まったり農場</td>
+      <td class="num">101,379,657</td>
+      <td class="num">11,946</td>
+      <td class="num">84,078</td>
+      <td class="num">159,912</td>
+      <td class="num">0</td>
+      <td class="num">2,831,016</td>
+      <td class="num">2,831,016</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">144</td>
+      <td>NちゃII3ー</td>
+      <td class="num">53,955,947</td>
+      <td class="num">10,703</td>
+      <td class="num">50,760</td>
+      <td class="num">141,911</td>
+      <td class="num">0</td>
+      <td class="num">2,393,168</td>
+      <td class="num">2,393,168</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">145</td>
+      <td>ChosHopper sub</td>
+      <td class="num">100,806,581</td>
+      <td class="num">28,123</td>
+      <td class="num">25,517</td>
+      <td class="num">73,425</td>
+      <td class="num">0</td>
+      <td class="num">1,257,083</td>
+      <td class="num">1,257,083</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">146</td>
+      <td>Gsub2</td>
+      <td class="num">168,829,590</td>
+      <td class="num">65,038</td>
+      <td class="num">187,537</td>
+      <td class="num">16,873</td>
+      <td class="num">0</td>
+      <td class="num">1,255,818</td>
+      <td class="num">1,255,818</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">147</td>
+      <td>AREA00</td>
+      <td class="num">88,024,985</td>
+      <td class="num">14,056</td>
+      <td class="num">24,894</td>
+      <td class="num">48,590</td>
+      <td class="num">0</td>
+      <td class="num">867,376</td>
+      <td class="num">867,376</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">148</td>
+      <td>団長クロロルシルフル</td>
+      <td class="num">62,469,654</td>
+      <td class="num">12,237</td>
+      <td class="num">132,372</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">674,097</td>
+      <td class="num">674,097</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">149</td>
+      <td>NちゃIII3ー</td>
+      <td class="num">88,300,726</td>
+      <td class="num">2,179</td>
+      <td class="num">6,264</td>
+      <td class="num">40,750</td>
+      <td class="num">0</td>
+      <td class="num">644,749</td>
+      <td class="num">644,749</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">150</td>
+      <td>nene lucky</td>
+      <td class="num">95,188,233</td>
+      <td class="num">71,210</td>
+      <td class="num">11,870</td>
+      <td class="num">31,380</td>
+      <td class="num">0</td>
+      <td class="num">601,260</td>
+      <td class="num">601,260</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">151</td>
+      <td>moominmama</td>
+      <td class="num">55,094,327</td>
+      <td class="num">4,975</td>
+      <td class="num">23,475</td>
+      <td class="num">29,794</td>
+      <td class="num">0</td>
+      <td class="num">569,260</td>
+      <td class="num">569,260</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">152</td>
+      <td>Tesh Farm 1</td>
+      <td class="num">112,305,360</td>
+      <td class="num">2,975</td>
+      <td class="num">27,107</td>
+      <td class="num">25,519</td>
+      <td class="num">0</td>
+      <td class="num">521,295</td>
+      <td class="num">521,295</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">153</td>
+      <td>アオクマサブ2</td>
+      <td class="num">88,672,995</td>
+      <td class="num">50,039</td>
+      <td class="num">8,789</td>
+      <td class="num">22,123</td>
+      <td class="num">0</td>
+      <td class="num">425,829</td>
+      <td class="num">425,829</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">154</td>
+      <td>piyopiyo sabu</td>
+      <td class="num">131,529,916</td>
+      <td class="num">528</td>
+      <td class="num">2,160</td>
+      <td class="num">19,096</td>
+      <td class="num">0</td>
+      <td class="num">297,768</td>
+      <td class="num">297,768</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">155</td>
+      <td>kinaꜰ</td>
+      <td class="num">81,991,366</td>
+      <td class="num">10,031</td>
+      <td class="num">14,388</td>
+      <td class="num">13,908</td>
+      <td class="num">0</td>
+      <td class="num">290,591</td>
+      <td class="num">290,591</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">156</td>
+      <td>DBSブルック</td>
+      <td class="num">61,820,059</td>
+      <td class="num">16,773</td>
+      <td class="num">22,137</td>
+      <td class="num">9,262</td>
+      <td class="num">0</td>
+      <td class="num">266,388</td>
+      <td class="num">266,388</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">157</td>
+      <td>エリアS88</td>
+      <td class="num">100,398,654</td>
+      <td class="num">3,382</td>
+      <td class="num">14,459</td>
+      <td class="num">10,551</td>
+      <td class="num">0</td>
+      <td class="num">233,942</td>
+      <td class="num">233,942</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">158</td>
+      <td>さらにゃん</td>
+      <td class="num">60,460,968</td>
+      <td class="num">25,231</td>
+      <td class="num">1,825</td>
+      <td class="num">12,900</td>
+      <td class="num">0</td>
+      <td class="num">227,856</td>
+      <td class="num">227,856</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">159</td>
+      <td>にゃんたそん KGODJ</td>
+      <td class="num">63,485,809</td>
+      <td class="num">12,394</td>
+      <td class="num">9,988</td>
+      <td class="num">8,865</td>
+      <td class="num">0</td>
+      <td class="num">195,309</td>
+      <td class="num">195,309</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">160</td>
+      <td>LingLingj</td>
+      <td class="num">157,271,498</td>
+      <td class="num">1,170</td>
+      <td class="num">1,419</td>
+      <td class="num">11,684</td>
+      <td class="num">0</td>
+      <td class="num">183,525</td>
+      <td class="num">183,525</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">161</td>
+      <td>SêNjüᴾᴴ</td>
+      <td class="num">112,407,028</td>
+      <td class="num">329</td>
+      <td class="num">15,016</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">75,409</td>
+      <td class="num">75,409</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">162</td>
+      <td>もんちゃん2</td>
+      <td class="num">58,726,770</td>
+      <td class="num">0</td>
+      <td class="num">12,521</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">62,605</td>
+      <td class="num">62,605</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">163</td>
+      <td>RTSensei1</td>
+      <td class="num">139,633,120</td>
+      <td class="num">20,509</td>
+      <td class="num">829</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">24,654</td>
+      <td class="num">24,654</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">164</td>
+      <td>LingLingo</td>
+      <td class="num">139,865,284</td>
+      <td class="num">2,710</td>
+      <td class="num">3,816</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">21,790</td>
+      <td class="num">21,790</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">165</td>
+      <td>もんちゃん3</td>
+      <td class="num">79,085,464</td>
+      <td class="num">0</td>
+      <td class="num">3,370</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">16,850</td>
+      <td class="num">16,850</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">166</td>
+      <td>コロッケなり</td>
+      <td class="num">105,751,804</td>
+      <td class="num">0</td>
+      <td class="num">3,006</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">15,030</td>
+      <td class="num">15,030</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">167</td>
+      <td>pickled octopus</td>
+      <td class="num">103,745,602</td>
+      <td class="num">889</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">889</td>
+      <td class="num">889</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">168</td>
+      <td>ᴶᴺ アナキン</td>
+      <td class="num">158,833,600</td>
+      <td class="num">875</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">875</td>
+      <td class="num">875</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">169</td>
+      <td>ノブナガ  ハザマ</td>
+      <td class="num">78,417,194</td>
+      <td class="num">0</td>
+      <td class="num">174</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">870</td>
+      <td class="num">870</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">170</td>
+      <td>NちゃI2ー</td>
+      <td class="num">74,494,131</td>
+      <td class="num">0</td>
+      <td class="num">123</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">615</td>
+      <td class="num">615</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">171</td>
+      <td>エリア1</td>
+      <td class="num">124,368,590</td>
+      <td class="num">337</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">337</td>
+      <td class="num">337</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">172</td>
+      <td>Pen太2</td>
+      <td class="num">102,796,476</td>
+      <td class="num">0</td>
+      <td class="num">67</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">335</td>
+      <td class="num">335</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">173</td>
+      <td>AREAサブ</td>
+      <td class="num">142,009,769</td>
+      <td class="num">0</td>
+      <td class="num">57</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">285</td>
+      <td class="num">285</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">174</td>
+      <td>ᴶᴺ クワイ・ガン</td>
+      <td class="num">157,902,293</td>
+      <td class="num">0</td>
+      <td class="num">31</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">155</td>
+      <td class="num">155</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">175</td>
+      <td>AREA11</td>
+      <td class="num">163,680,569</td>
+      <td class="num">136</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">136</td>
+      <td class="num">136</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">176</td>
+      <td>㋛ Pazzito</td>
+      <td class="num">66,743,435</td>
+      <td class="num">38</td>
+      <td class="num">18</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">128</td>
+      <td class="num">128</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">177</td>
+      <td>Pen太</td>
+      <td class="num">91,783,488</td>
+      <td class="num">0</td>
+      <td class="num">10</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">50</td>
+      <td class="num">50</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">178</td>
+      <td>エリアサブ2</td>
+      <td class="num">142,009,829</td>
+      <td class="num">47</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">47</td>
+      <td class="num">47</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">179</td>
+      <td>ᴰᴮˢ puppet</td>
+      <td class="num">73,429,882</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">180</td>
+      <td>ブティックタケノコ</td>
+      <td class="num">166,637,407</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">181</td>
+      <td>LEGACYWORLD</td>
+      <td class="num">139,391,105</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">182</td>
+      <td>FlämänSub</td>
+      <td class="num">177,551,544</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">183</td>
+      <td>GodLuvsÜ mini3</td>
+      <td class="num">139,208,559</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">184</td>
+      <td>笑福亭サブ2</td>
+      <td class="num">86,450,290</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">185</td>
+      <td>みすたーJ</td>
+      <td class="num">128,699,175</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">186</td>
+      <td>GodLuvsÜ mini4</td>
+      <td class="num">148,172,160</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">187</td>
+      <td>NちゃⅣ2ー</td>
+      <td class="num">136,259,751</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">188</td>
+      <td>めすたーKJ</td>
+      <td class="num">136,033,214</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">189</td>
+      <td>農民だよ</td>
+      <td class="num">61,816,264</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">190</td>
+      <td>ᴹᶠすだこ</td>
+      <td class="num">164,195,055</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">191</td>
+      <td>天くんlaundry</td>
+      <td class="num">74,300,733</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">192</td>
+      <td>Zun Bot</td>
+      <td class="num">178,871,150</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">193</td>
+      <td>武将レガ</td>
+      <td class="num">73,431,982</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">194</td>
+      <td>IGREJA ll</td>
+      <td class="num">145,306,152</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">195</td>
+      <td>Pen太5</td>
+      <td class="num">167,927,469</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">196</td>
+      <td>JS7</td>
+      <td class="num">139,696,534</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">197</td>
+      <td>ねねのお友達</td>
+      <td class="num">101,526,991</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">198</td>
+      <td>チームメンヘラ</td>
+      <td class="num">69,432,019</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">199</td>
+      <td>Zunさん</td>
+      <td class="num">76,962,198</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">200</td>
+      <td>Flämänザコ1</td>
+      <td class="num">191,030,385</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">201</td>
+      <td>Michael211</td>
+      <td class="num">146,457,706</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">202</td>
+      <td>groni56</td>
+      <td class="num">169,327,582</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">203</td>
+      <td>みすたーYSG</td>
+      <td class="num">131,767,094</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">204</td>
+      <td>アオくまᵂᴷ</td>
+      <td class="num">103,722,997</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">205</td>
+      <td>しんなり2940</td>
+      <td class="num">182,303,641</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">206</td>
+      <td>みせすkj</td>
+      <td class="num">147,941,007</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">207</td>
+      <td>hopperbaby</td>
+      <td class="num">89,680,950</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">208</td>
+      <td>ᴷˣchipaちぱ姫</td>
+      <td class="num">57,471,795</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">209</td>
+      <td>NちゃⅤ1ー</td>
+      <td class="num">138,757,129</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">210</td>
+      <td>MXM IL GRANDE</td>
+      <td class="num">139,752,183</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">211</td>
+      <td>iLTW2</td>
+      <td class="num">60,162,291</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">212</td>
+      <td>NちゃⅣ1ー</td>
+      <td class="num">63,372,701</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">213</td>
+      <td>武蔵坊弁慶</td>
+      <td class="num">173,658,473</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">214</td>
+      <td>白ひげの別荘地</td>
+      <td class="num">54,317,951</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">215</td>
+      <td>Sakapus</td>
+      <td class="num">139,765,309</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">216</td>
+      <td>小ロスケナリ</td>
+      <td class="num">68,178,360</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">217</td>
+      <td>乂 3zra2il 乂</td>
+      <td class="num">60,028,233</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">218</td>
+      <td>ᴶᴺ ダースベイダ</td>
+      <td class="num">88,992,292</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">219</td>
+      <td>GodLuvsÜ mini2</td>
+      <td class="num">133,924,371</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">220</td>
+      <td>ᴶᴺ ハン・ソロ</td>
+      <td class="num">98,995,668</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">221</td>
+      <td>亗ぽてにゃん亗</td>
+      <td class="num">153,796,208</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">222</td>
+      <td>nullfarm</td>
+      <td class="num">178,890,132</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">223</td>
+      <td>napolll</td>
+      <td class="num">143,313,976</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">224</td>
+      <td>Metehan 21 34 m</td>
+      <td class="num">79,439,771</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">225</td>
+      <td>亗potechi亗</td>
+      <td class="num">135,813,174</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">226</td>
+      <td>Itxaso</td>
+      <td class="num">85,165,626</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">227</td>
+      <td>GodLuvsÜ mini1</td>
+      <td class="num">132,348,105</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">228</td>
+      <td>亗ぽてさら亗</td>
+      <td class="num">140,945,956</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">229</td>
+      <td>亗ぽてゴン亗</td>
+      <td class="num">141,044,677</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">230</td>
+      <td>モーンちゃん</td>
+      <td class="num">62,466,097</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">231</td>
+      <td>nik111</td>
+      <td class="num">139,769,984</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">232</td>
+      <td>SL KING RAWANA1</td>
+      <td class="num">165,827,308</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">233</td>
+      <td>FlämänEvery</td>
+      <td class="num">156,786,116</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">234</td>
+      <td>イケおじだった白ひげ</td>
+      <td class="num">63,071,295</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">235</td>
+      <td>ᴵᶠ Zunさん</td>
+      <td class="num">169,265,755</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">236</td>
+      <td>みすたーYMD</td>
+      <td class="num">73,777,293</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">237</td>
+      <td>ᵏ ˣすだこ</td>
+      <td class="num">164,191,288</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">238</td>
+      <td>ᴰᴮˢ心壱</td>
+      <td class="num">60,552,394</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">239</td>
+      <td>れがにゃんにゃん</td>
+      <td class="num">69,276,943</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">240</td>
+      <td>Pen太4</td>
+      <td class="num">123,472,294</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">241</td>
+      <td>ねねのワンコ農家</td>
+      <td class="num">182,849,021</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">242</td>
+      <td>ねねの農家</td>
+      <td class="num">182,840,044</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">243</td>
+      <td>ᴶᴺ ウィンドウ</td>
+      <td class="num">151,181,639</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">244</td>
+      <td>Pensolin</td>
+      <td class="num">139,761,732</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">245</td>
+      <td>Gsub3</td>
+      <td class="num">170,036,216</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">246</td>
+      <td>しんなり3467fa3</td>
+      <td class="num">177,550,974</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">247</td>
+      <td>Bäby K</td>
+      <td class="num">96,220,322</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">248</td>
+      <td>勝海舟</td>
+      <td class="num">173,657,864</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">249</td>
+      <td>ᴶᴺ レイア姫</td>
+      <td class="num">148,791,055</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">250</td>
+      <td>Lost mage</td>
+      <td class="num">139,704,095</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">251</td>
+      <td>ブッティ</td>
+      <td class="num">114,769,700</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">252</td>
+      <td>BuZZer Farm 1</td>
+      <td class="num">149,365,443</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">253</td>
+      <td>農民です</td>
+      <td class="num">141,068,330</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+
+    <tr>
+      <td class="num">254</td>
+      <td>Flämän ザコ2</td>
+      <td class="num">191,030,730</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+      <td class="num">0</td>
+    </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">Generated automatically from sheets 20251016 / 20251118</div>
+  </div>
 </body>
 </html>
-
